@@ -1,0 +1,61 @@
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #f1f5f9;
+  background-color: #0b0f19;
+  background-image:
+    radial-gradient(1000px circle at 50% 0%, rgba(159, 31, 239, 0.1), transparent 50%),
+    radial-gradient(1000px circle at 80% 80%, rgba(0, 212, 255, 0.05), transparent 50%);
+  overflow-x: hidden;
+  position: relative;
+}
+
+.text-indigo-400 {
+  color: #9f1fef;
+  text-shadow: 0 0 16px rgba(159, 31, 239, 0.4);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 25px;
+  background: linear-gradient(45deg, transparent, rgba(159, 31, 239, 0.3), transparent);
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.cta-btn {
+  background: #9f1fef !important;
+  box-shadow: 0 4px 14px rgba(159, 31, 239, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #fff !important;
+  text-decoration: none;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(159, 31, 239, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: #ad33fa !important;
+}
+
+.text-gray-400 {
+  color: #94a3b8;
+}
+
+.text-gray-500 {
+  color: #64748b;
+}

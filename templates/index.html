@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Watermark Remover</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+
+<body>
+  <header class="header">
+    <div class="brand">AI Watermark Remover</div>
+    <nav class="nav">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/about.html" class="nav-link">About</a>
+      <a href="https://github.com/ankush850" target="_blank" rel="noopener" class="nav-link">Github</a>
+    </nav>
+  </header>
+
+  <main class="main">
+    <section class="hero">
+      <h1 class="hero-title">AI Watermark Remover</h1>
+      <p class="hero-subtitle">Remove Gamma AI watermarks from PDF and PowerPoint files.</p>
+    </section>
+
+    <section class="card">
+      <div class="upload">
+        <input type="file" id="fileInput" accept=".pdf,.pptx" class="visually-hidden">
+        <div class="dropzone" id="dropZone">
+          <div class="dz-instruction">Drag & Drop file here</div>
+          <div class="dz-sep">or</div>
+          <button class="btn ghost" id="chooseBtn">Choose File</button>
+          <div class="file-meta" id="fileMeta"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="removeBtn">Remove Watermark</button>
+      </div>
+      <div class="status" id="statusBox" aria-live="polite"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>© 2026 AI Watermark Remover — Minimal. Elegant. Reliable.</span>
+  </footer>
+
+  <div class="particles"></div>
+  <script src="/static/js/app.js"></script>
+</body>
+
+</html>
