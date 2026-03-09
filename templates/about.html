@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About • AI Watermark Remover</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+
+<body>
+  <header class="header">
+
+    <nav class="nav">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/index.html" class="nav-link">Tool</a>
+
+
+      <main class="main">
+        <section class="hero">
+          <h1 class="hero-title">About This Project</h1>
+          <p class="hero-subtitle">Built and maintained by Ankush Singh Rawat (ankush850).</p>
+        </section>
+
+        <section class="card">
+          <h2 style="margin:0 0 10px;font-size:20px;font-weight:800;color:#f2f2f2">How This Tool Works</h2>
+          <p style="color:#d1d1d1">This tool detects and removes Gamma.app watermarks in PDF and PowerPoint files, then
+            provides a cleaned download.</p>
+          <h3 style="margin:16px 0 8px;font-size:16px;font-weight:700;color:#e9e9e9">Upload Flow</h3>
+          <ul style="margin:0;padding-left:18px">
+            <li>Frontend sends the selected file to POST /api/remove-watermark as FormData.</li>
+            <li>Backend writes to a temp file, inspects extension, and selects the processor.</li>
+            <li>After cleaning, it saves outputs/processed_originalname and returns JSON with stats and download_url.
+            </li>
+          </ul>
+          <h3 style="margin:16px 0 8px;font-size:16px;font-weight:700;color:#e9e9e9">Detection Logic</h3>
+          <ul style="margin:0;padding-left:18px">
+            <li>PDF: Looks for Gamma-linked elements near the bottom-right corner (beyond ~70% width/height).</li>
+            <li>PPTX: Analyzes slide masters/layouts; finds shapes with hyperlinks to gamma.app positioned in the corner
+              region.</li>
+          </ul>
+          <h3 style="margin:16px 0 8px;font-size:16px;font-weight:700;color:#e9e9e9">Removal Logic</h3>
+          <ul style="margin:0;padding-left:18px">
+            <li>PDF: Removes clickable images and link annotations pointing to gamma.app; returns images_removed,
+              links_removed, total_removed.</li>
+            <li>PPTX: Iterates masters and layouts; deletes watermark shapes; returns watermarks_removed and
+              layouts_cleaned.</li>
+          </ul>
+          <h3 style="margin:16px 0 8px;font-size:16px;font-weight:700;color:#e9e9e9">Outputs & Stats</h3>
+          <ul style="margin:0;padding-left:18px">
+            <li>On success, a cleaned file is written to outputs/processed_filename.</li>
+            <li>API responds with file_type, watermarks_removed (PDF totals), layouts_processed (PPTX), and download_url
+              when available.</li>
+            <li>UI shows a single success message and a centered Download button.</li>
+          </ul>
+          <h3 style="margin:16px 0 8px;font-size:16px;font-weight:700;color:#e9e9e9">Security & Validation</h3>
+          <ul style="margin:0;padding-left:18px">
+            <li>Frontend restricts to .pdf and .pptx and enforces a 50 MB limit.</li>
+            <li>Backend validates file type, uses secure filenames, and deletes temp uploads after processing.</li>
+          </ul>
+
+          </div>
+        </section>
+      </main>
+
+
+      <div class="particles"></div>
+      <script src="/static/js/app.js"></script>
+</body>
+
+</html>
