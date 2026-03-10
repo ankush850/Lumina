@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: lumina-watermark-remover
+    env: docker
+    plan: free
+    region: ohio
+    branch: main
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 8999
