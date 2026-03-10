@@ -21,8 +21,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Create necessary directories
-UPLOAD_FOLDER = os.path.join(tempfile.gettempdir(), "uploads")
-OUTPUT_FOLDER = os.path.join(tempfile.gettempdir(), "outputs")
+UPLOAD_FOLDER = "uploads"
+OUTPUT_FOLDER = "outputs"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
