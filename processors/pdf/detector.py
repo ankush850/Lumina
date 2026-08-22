@@ -21,7 +21,7 @@ def remove_all_target_links(page, target_domain):
         if target_domain in uri:
             page.delete_link(link)
             removed_count += 1
-            print(f"    ✓ Link removed: {link.get('uri', '')}")
+            print(f"    [+] Link removed: {link.get('uri', '')}")
 
     return removed_count
 
@@ -100,10 +100,10 @@ def remove_corner_images_with_links(page, target_domain, corner_threshold=0.7):
                 page.delete_image(xref)
                 removed_count += 1
                 print(
-                    f"    ✓ Removed image ({img_type}) xref:{xref}: {', '.join(sizes)}"
+                    f"    [+] Removed image ({img_type}) xref:{xref}: {', '.join(sizes)}"
                 )
             except Exception as e:
-                print(f"    ✗ Error removing image xref:{xref}: {e}")
+                print(f"    [X] Error removing image xref:{xref}: {e}")
     else:
         print("    No images with target links found in corner")
 
@@ -156,7 +156,7 @@ class WatermarkDetector:
                                     }
                                 )
                                 found_targets = True
-                                print(f"  ✓ Found image with target link: {url}")
+                                print(f"  [+] Found image with target link: {url}")
 
                 # Check links to target domain
                 links = page.get_links()
@@ -172,7 +172,7 @@ class WatermarkDetector:
                             }
                         )
                         found_targets = True
-                        print(f"  ✓ Found target link: {link.get('uri', '')}")
+                        print(f"  [+] Found target link: {link.get('uri', '')}")
 
                 if not found_targets:
                     print("  No target elements found")

@@ -212,12 +212,12 @@ class PPTXWatermarkRemover:
                     removed_count += 1
                     if hyperlink_url:
                         logger.info(
-                            f"    ✓ Removed watermark: {shape.name} -> {hyperlink_url}"
+                            f"    [+] Removed watermark: {shape.name} -> {hyperlink_url}"
                         )
                     else:
-                        logger.info(f"    ✓ Removed corner image: {shape.name}")
+                        logger.info(f"    [+] Removed corner image: {shape.name}")
             except Exception as e:
-                logger.error(f"    ✗ Failed to remove shape {shape.name}: {e}")
+                logger.error(f"    [X] Failed to remove shape {shape.name}: {e}")
 
         return removed_count
 

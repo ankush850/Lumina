@@ -39,8 +39,8 @@ pptx_processor = PPTXProcessor()
 # Security: 50MB limit
 MAX_FILE_SIZE = 50 * 1024 * 1024
 
-async def valid_content_length(content_length: int = Header(..., description="The size of the request body in bytes")):
-    if content_length > MAX_FILE_SIZE:
+async def valid_content_length(content_length: int = Header(None, description="The size of the request body in bytes")):
+    if content_length is not None and content_length > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail=f"File too large. Maximum size allowed is 50MB.")
     return content_length
 
@@ -57,9 +57,28 @@ def cleanup_old_files(max_age_seconds: int = 3600):
                 logger.error(f"Error cleaning up {filepath}: {e}")
 
 
+# ===========================
+# HEALTH CHECK ROUTES (UptimeRobot / Render)
+# ===========================
+@app.api_route("/health", methods=["GET", "HEAD"])
+@app.api_route("/healthz", methods=["GET", "HEAD"], include_in_schema=False)
+@app.api_route("/ping", methods=["GET", "HEAD"], include_in_schema=False)
+async def health_check():
+    """Health check endpoint for UptimeRobot, Render, and monitoring services."""
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "healthy",
+            "service": "Lumina AI",
+            "version": "2.5.0",
+            "timestamp": time.time(),
+        }
+    )
+
+
 @app.get("/", response_class=HTMLResponse)
 async def landing(request: Request):
-    return templates.TemplateResponse("landing.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="landing.html")
 
 @app.get('/favicon.ico', include_in_schema=False)
 async def favicon():
@@ -67,15 +86,15 @@ async def favicon():
 
 @app.get("/landing.html", response_class=HTMLResponse)
 async def landing_alias(request: Request):
-    return templates.TemplateResponse("landing.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="landing.html")
 
 @app.get("/index.html", response_class=HTMLResponse)
 async def tool_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 @app.get("/about.html", response_class=HTMLResponse)
 async def about_page(request: Request):
-    return templates.TemplateResponse("about.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="about.html")
 
 @app.post("/remove_watermark")
 async def remove_watermark(
@@ -91,18 +110,18 @@ async def remove_watermark(
     background_tasks.add_task(cleanup_old_files)
     if not pdf_file.filename:
         return templates.TemplateResponse(
-            "index.html",
-            {
-                "request": request,
+            request=request,
+            name="index.html",
+            context={
                 "error_message": "No file selected. Please choose a PDF or PPTX file.",
             },
         )
 
     if not allowed_file(pdf_file.filename):
         return templates.TemplateResponse(
-            "index.html",
-            {
-                "request": request,
+            request=request,
+            name="index.html",
+            context={
                 "error_message": "Invalid file type. Please upload a PDF or PowerPoint (.pptx) file.",
             },
         )
@@ -127,9 +146,9 @@ async def remove_watermark(
     # Additional validation: ensure we have a valid extension
     if not file_extension:
         return templates.TemplateResponse(
-            "index.html",
-            {
-                "request": request,
+            request=request,
+            name="index.html",
+            context={
                 "error_message": "Invalid file name. Please upload a file with a proper extension (.pdf or .pptx).",
             },
         )
@@ -152,9 +171,9 @@ async def remove_watermark(
                 return await _process_pptx(request, upload_path, filename)
             else:
                 return templates.TemplateResponse(
-                    "index.html",
-                    {
-                        "request": request,
+                    request=request,
+                    name="index.html",
+                    context={
                         "error_message": f"Unsupported file type: {file_extension}",
                     },
                 )
@@ -162,9 +181,9 @@ async def remove_watermark(
         except Exception as e:
             logger.error(f"Error processing file: {str(e)}")
             return templates.TemplateResponse(
-                "index.html",
-                {
-                    "request": request,
+                request=request,
+                name="index.html",
+                context={
                     "error_message": f"Error processing file: {str(e)}",
                 },
             )
@@ -186,7 +205,7 @@ async def _process_pdf(request: Request, upload_path: str, filename: str):
     if not result["success"]:
         raise Exception(result["error"])
 
-    template_data = {"request": request, "success_message": result["message"]}
+    template_data = {"success_message": result["message"]}
     if "stats" in result and isinstance(result["stats"], dict):
         template_data["stats"] = result["stats"]
 
@@ -194,7 +213,7 @@ async def _process_pdf(request: Request, upload_path: str, filename: str):
         template_data["download_filename"] = output_filename
         template_data["file_type"] = "pdf"
 
-    return templates.TemplateResponse("index.html", template_data)
+    return templates.TemplateResponse(request=request, name="index.html", context=template_data)
 
 
 async def _process_pptx(request: Request, upload_path: str, filename: str):
@@ -207,7 +226,7 @@ async def _process_pptx(request: Request, upload_path: str, filename: str):
     if not result["success"]:
         raise Exception(result["error"])
 
-    template_data = {"request": request, "success_message": result["message"]}
+    template_data = {"success_message": result["message"]}
     if "stats" in result and isinstance(result["stats"], dict):
         template_data["stats"] = result["stats"]
 
@@ -215,7 +234,7 @@ async def _process_pptx(request: Request, upload_path: str, filename: str):
         template_data["download_filename"] = output_filename
         template_data["file_type"] = "pptx"
 
-    return templates.TemplateResponse("index.html", template_data)
+    return templates.TemplateResponse(request=request, name="index.html", context=template_data)
 
 @app.post("/api/remove-watermark")
 async def api_remove_watermark(
@@ -223,6 +242,7 @@ async def api_remove_watermark(
     file: UploadFile = File(...),
     content_length: int = Depends(valid_content_length)
 ):
+    start_time = time.time()
     background_tasks.add_task(cleanup_old_files)
     import shutil
     if not file.filename or not allowed_file(file.filename):
@@ -241,38 +261,58 @@ async def api_remove_watermark(
             upload_path = temp_input.name
             file.file.seek(0)
             shutil.copyfileobj(file.file, temp_input)
+            temp_input.flush()
+            file_size_bytes = os.path.getsize(upload_path)
+            
         output_filename = f"processed_{safe_name}"
         output_path = os.path.join(OUTPUT_FOLDER, output_filename)
+        
         if ext == "pdf":
             result = pdf_processor.process(upload_path, output_path, safe_name)
             if not result["success"]:
                 return JSONResponse(status_code=500, content={"status": "error", "message": result["error"]})
             stats = result.get("stats", {})
+            duration = f"{time.time() - start_time:.2f}s"
             response = {
                 "status": "success",
                 "file_type": "pdf",
+                "original_filename": file.filename,
+                "file_size": file_size_bytes,
                 "layouts_processed": 0,
                 "watermarks_removed": stats.get("total_removed", 0),
+                "has_watermark": result.get("has_watermark", False),
+                "processing_time": duration,
+                "message": result.get("message", "Document processed successfully")
             }
         elif ext == "pptx":
             result = pptx_processor.process(upload_path, output_path, safe_name)
             if not result["success"]:
                 return JSONResponse(status_code=500, content={"status": "error", "message": result["error"]})
             stats = result.get("stats", {})
+            duration = f"{time.time() - start_time:.2f}s"
             response = {
                 "status": "success",
                 "file_type": "pptx",
+                "original_filename": file.filename,
+                "file_size": file_size_bytes,
                 "layouts_processed": stats.get("layouts_cleaned", 0),
                 "watermarks_removed": stats.get("watermarks_removed", 0),
+                "has_watermark": result.get("has_watermark", False),
+                "processing_time": duration,
+                "message": result.get("message", "Presentation processed successfully")
             }
         else:
             return JSONResponse(status_code=400, content={"status": "error", "message": "Unsupported file type"})
+            
         if result.get("has_watermark"):
             response["download_url"] = f"/download/{output_filename}"
         else:
-            response["message"] = "No Gamma watermarks detected"
+            response["download_url"] = f"/download/{output_filename}" if os.path.exists(output_path) else None
+            response["message"] = "No Gamma watermarks detected. Original layout preserved."
+            
         return JSONResponse(content=response)
     except Exception as e:
+        logger.error(f"API processing error: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
     finally:
         try:
@@ -307,13 +347,15 @@ async def download_processed_file(filename: str):
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code == 404:
         return templates.TemplateResponse(
-            "index.html",
-            {"request": request, "error_message": "Page not found."},
+            request=request,
+            name="index.html",
+            context={"error_message": "Page not found."},
             status_code=404,
         )
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "error_message": f"Server error: {exc.detail}"},
+        request=request,
+        name="index.html",
+        context={"error_message": f"Server error: {exc.detail}"},
         status_code=exc.status_code,
     )
 
@@ -321,8 +363,9 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "error_message": f"Internal server error: {str(exc)}"},
+        request=request,
+        name="index.html",
+        context={"error_message": f"Internal server error: {str(exc)}"},
         status_code=500,
     )
 
