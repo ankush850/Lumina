@@ -1,73 +1,441 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gamma Watermark Remover</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/static/css/landing.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumina AI • Pristine Presentations, Zero Watermarks in Seconds</title>
+  <meta name="description" content="World-class AI document processor to remove Gamma.app watermarks from PowerPoint (.pptx) and PDF files with lossless vector retention." />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet" />
+
+  <!-- Core & Landing Stylesheets -->
+  <link rel="stylesheet" href="/static/css/styles.css" />
+  <link rel="stylesheet" href="/static/css/landing.css" />
 </head>
 
-<body class="text-white">
-  <header class="flex justify-between items-center px-10 py-6">
-    <h1 class="text-xl font-bold tracking-wide">
-      Gamma Watermark Remover
-    </h1>
-    <a href="/index.html"
-      class="cta-btn bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded-xl font-semibold transition">
-      Get Started
-    </a>
+<body>
+  <!-- Ambient Mesh Background -->
+  <div class="bg-mesh"></div>
+  <div class="bg-grid-overlay"></div>
+
+  <!-- Navigation Bar -->
+  <header class="lumina-nav">
+    <div class="nav-container">
+      <a href="/" class="brand-logo">
+        <img src="/static/favicon.svg" alt="Lumina Logo" class="brand-logo-img" />
+        <span class="brand-name">Lumina AI</span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#features" class="nav-link">Features</a></li>
+          <li><a href="#pipeline" class="nav-link">How It Works</a></li>
+          <li><a href="#comparison" class="nav-link">Comparison</a></li>
+          <li><a href="#faq" class="nav-link">FAQ</a></li>
+          <li><a href="/about.html" class="nav-link">Developer API</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="/index.html" class="btn-primary" style="padding: 10px 22px; font-size: 14px; width: auto; border-radius: var(--radius-full);">
+          <span class="material-symbols-outlined" style="font-size: 18px;">bolt</span>
+          <span>Launch Studio</span>
+        </a>
+      </div>
+    </div>
   </header>
 
-  <section class="text-center pt-28 pb-32 px-6">
-    <h1 class="text-5xl md:text-6xl font-bold leading-tight max-w-4xl mx-auto">
-      Remove Gamma Watermarks
-      <span class="text-indigo-400">in Seconds</span>
-    </h1>
-    <p class="text-gray-400 mt-6 max-w-xl mx-auto text-lg">
-      Clean your Gamma generated files instantly.
-      Upload your document and download a watermark-free version in seconds.
-    </p>
-    <div class="mt-10">
-      <a href="/index.html"
-        class="cta-btn bg-indigo-600 hover:bg-indigo-700 px-10 py-4 text-lg rounded-2xl font-semibold transition shadow-lg shadow-indigo-600/20">
-        Get Started
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-grid">
+      <!-- Left Copy -->
+      <div class="hero-content">
+        <div class="engine-status-pill">
+          <div class="pulse-dot-cyan"></div>
+          <span>Gamma AI Sanitizer v2.5 Online</span>
+        </div>
+
+        <h1 class="hero-headline">
+          Pristine Presentations,<br />
+          <span class="gradient-title">Zero Watermarks</span><br />
+          in Seconds
+        </h1>
+
+        <p class="hero-description">
+          Eliminate intrusive Gamma.app watermarks from PowerPoint decks and PDF documents. Our dual-engine preserves 100% of your vector geometry, typography, and slide layouts.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="/index.html" class="btn-primary">
+            <span class="material-symbols-outlined">auto_fix_high</span>
+            <span>Clean Your File Now</span>
+          </a>
+          <a href="#features" class="btn-secondary">
+            <span class="material-symbols-outlined">explore</span>
+            <span>Explore Features</span>
+          </a>
+        </div>
+
+        <!-- Platform Capability Pillars -->
+        <div class="hero-metrics-row">
+          <div class="metric-item">
+            <span class="metric-value">PDF &amp; PPTX</span>
+            <span class="metric-label">Supported Formats</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-value">100%</span>
+            <span class="metric-label">Lossless Vector Fidelity</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-value">Zero Data</span>
+            <span class="metric-label">Ephemeral Retention</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Interactive Before/After Visual Slider -->
+      <div class="slider-preview-card" id="slider-container">
+        <div class="slider-inner">
+          <!-- After Mockup (Clean Slide Background) -->
+          <div class="slide-mockup">
+            <div class="mock-slide-header">
+              <span class="mock-slide-title">Presentation Architecture &amp; Design</span>
+              <span class="brand-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Clean Output</span>
+            </div>
+            
+            <div class="mock-slide-body">
+              <div class="mock-slide-box">
+                <span style="font-size: 13px; font-weight: 600; color: #fff;">Vector Path Hierarchy</span>
+                <div class="mock-slide-bar w-90"></div>
+                <div class="mock-slide-bar w-75"></div>
+                <div class="mock-slide-bar w-50"></div>
+              </div>
+              <div class="mock-slide-box">
+                <span style="font-size: 13px; font-weight: 600; color: #fff;">Layout Structure</span>
+                <div style="height: 50px; border-radius: 8px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2)); border: 1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:12px; color:var(--secondary-light);">Pristine Slide Master</div>
+              </div>
+            </div>
+
+            <div style="font-size: 11px; color: var(--text-dim); display: flex; justify-content: space-between;">
+              <span>Slide 01 of 12</span>
+              <span>Lumina Vector Sanitized</span>
+            </div>
+          </div>
+
+          <!-- Before Layer (Watermarked - Clipped with Splitter) -->
+          <div class="slider-before-layer" id="slider-before-layer">
+            <div class="slider-before-content">
+              <div class="slide-mockup">
+                <div class="mock-slide-header">
+                  <span class="mock-slide-title">Presentation Architecture &amp; Design</span>
+                  <span class="brand-badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3);">Gamma Watermarked</span>
+                </div>
+                
+                <div class="mock-slide-body">
+                  <div class="mock-slide-box">
+                    <span style="font-size: 13px; font-weight: 600; color: #fff;">Vector Path Hierarchy</span>
+                    <div class="mock-slide-bar w-90"></div>
+                    <div class="mock-slide-bar w-75"></div>
+                    <div class="mock-slide-bar w-50"></div>
+                  </div>
+                  <div class="mock-slide-box">
+                    <span style="font-size: 13px; font-weight: 600; color: #fff;">Layout Structure</span>
+                    <div style="height: 50px; border-radius: 8px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2)); border: 1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:12px; color:var(--secondary-light);">Pristine Slide Master</div>
+                  </div>
+                </div>
+
+                <div style="font-size: 11px; color: var(--text-dim); display: flex; justify-content: space-between;">
+                  <span>Slide 01 of 12</span>
+                  <span>Draft Output</span>
+                </div>
+
+                <!-- Obtrusive Gamma Watermark Badge -->
+                <div class="gamma-watermark-overlay">
+                  <div class="gamma-logo-icon"></div>
+                  <span>Made with Gamma</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Draggable Splitter Handle Button -->
+          <div class="slider-handle-btn" id="slider-handle-btn">
+            <span class="material-symbols-outlined" style="font-size: 20px;">drag_indicator</span>
+          </div>
+
+          <!-- Badges -->
+          <span class="slider-tag before">Before</span>
+          <span class="slider-tag after">After</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Showcase Bento Grid -->
+  <section class="section-wrapper" id="features">
+    <div class="section-header">
+      <div class="hero-pill-badge">
+        <span class="material-symbols-outlined" style="font-size: 16px;">verified</span>
+        <span>Dual-Engine Precision</span>
+      </div>
+      <h2 class="section-title">Engineered for Flawless Output</h2>
+      <p class="section-subtitle">
+        Unlike basic converter websites that flatten presentations into blurry raster images, Lumina operates directly on the underlying document AST.
+      </p>
+    </div>
+
+    <div class="bento-grid">
+      <!-- Card 1: Span 2 -->
+      <div class="bento-card span-2">
+        <div>
+          <div class="bento-icon">
+            <span class="material-symbols-outlined">layers_clear</span>
+          </div>
+          <h3 class="bento-title">Precision Slide Master &amp; Layout Cleaner</h3>
+          <p class="bento-desc">
+            Deeply inspects PowerPoint XML trees (slideMasters, slideLayouts, slideRels). Pinpoints shapes, hyperlinks, and action tags targeting gamma.app without altering adjacent headings, bullet lists, or tables.
+          </p>
+        </div>
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 16px; font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);">
+          <span>• XML AST Traversal</span>
+          <span>• Bounding Box Math</span>
+          <span>• Zero Artifacts</span>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bento-card">
+        <div>
+          <div class="bento-icon">
+            <span class="material-symbols-outlined">architecture</span>
+          </div>
+          <h3 class="bento-title">Lossless Vector Retention</h3>
+          <p class="bento-desc">
+            Retains embedded SVGs, custom shape paths, gradients, and font kerning. Crisp on 4K projectors and Retina screens.
+          </p>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 12px; color: var(--secondary-light);">
+          100% Vector Geometry
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bento-card">
+        <div>
+          <div class="bento-icon">
+            <span class="material-symbols-outlined">picture_as_pdf</span>
+          </div>
+          <h3 class="bento-title">PDF &amp; PPTX Dual Engine</h3>
+          <p class="bento-desc">
+            Supports both `.pdf` and `.pptx` documents with native PyMuPDF stream editing and python-pptx structural pruning.
+          </p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span class="format-pill pdf">PDF v1.7</span>
+          <span class="format-pill pptx">PowerPoint 365</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Span 2 -->
+      <div class="bento-card span-2">
+        <div>
+          <div class="bento-icon">
+            <span class="material-symbols-outlined">security</span>
+          </div>
+          <h3 class="bento-title">Zero Retention &amp; In-Memory Privacy</h3>
+          <p class="bento-desc">
+            Your proprietary presentation data never leaves ephemeral memory. Files are processed instantaneously, and an automated background sweeper shreds all temporary buffers after 60 minutes.
+          </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; color: #34d399; font-family: var(--font-mono); font-size: 12px;">
+          <span class="material-symbols-outlined" style="font-size: 16px;">lock</span>
+          <span>Automated Ephemeral Purge Cycle Active</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Pipeline -->
+  <section class="section-wrapper" id="pipeline" style="padding-top: 0;">
+    <div class="pipeline-card">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <div class="pulse-dot-cyan"></div>
+        <span style="font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; color: var(--secondary-light); letter-spacing: 0.05em;">Execution Architecture</span>
+      </div>
+      <h2 class="section-title" style="font-size: 32px; margin-bottom: 8px;">How Lumina Operates</h2>
+      <p class="section-subtitle">A multi-stage pipeline designed for extreme speed and precision.</p>
+
+      <div class="pipeline-steps-row">
+        <div class="pipeline-step-item">
+          <div class="pipeline-step-num">01</div>
+          <h4 class="pipeline-step-title">Upload Buffer</h4>
+          <p class="pipeline-step-desc">Secure streaming to memory buffer with instant MIME validation.</p>
+        </div>
+
+        <div class="pipeline-step-item">
+          <div class="pipeline-step-num">02</div>
+          <h4 class="pipeline-step-title">Master AST Scan</h4>
+          <p class="pipeline-step-desc">Parses layout XML and PDF bounding coordinates for watermarks.</p>
+        </div>
+
+        <div class="pipeline-step-item">
+          <div class="pipeline-step-num">03</div>
+          <h4 class="pipeline-step-title">Selective Purge</h4>
+          <p class="pipeline-step-desc">Strips Gamma hyperlinks and image nodes without layout shift.</p>
+        </div>
+
+        <div class="pipeline-step-item">
+          <div class="pipeline-step-num">04</div>
+          <h4 class="pipeline-step-title">Pristine Export</h4>
+          <p class="pipeline-step-desc">Delivers instant one-click download of the clean presentation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Matrix Table -->
+  <section class="section-wrapper" id="comparison">
+    <div class="section-header">
+      <h2 class="section-title">Why Professionals Choose Lumina</h2>
+      <p class="section-subtitle">Comparing Lumina with online document converters and manual editing.</p>
+    </div>
+
+    <div class="comparison-table-wrapper">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature / Capability</th>
+            <th class="lumina-col">✨ Lumina AI Studio</th>
+            <th>Generic Online Converters</th>
+            <th>Manual PPTX Editing</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Vector &amp; Font Quality</strong></td>
+            <td class="lumina-col" style="color: #34d399;">100% Lossless Vectors</td>
+            <td style="color: #f87171;">Rasterized Blur</td>
+            <td style="color: #f87171;">Difficult to isolate</td>
+          </tr>
+          <tr>
+            <td><strong>Slide Master Purging</strong></td>
+            <td class="lumina-col" style="color: #34d399;">Automated Deep Pruning</td>
+            <td style="color: #f87171;">Ignored / Corrupted</td>
+            <td style="color: #fb923c;">Requires 30+ clicks per file</td>
+          </tr>
+          <tr>
+            <td><strong>Processing Speed</strong></td>
+            <td class="lumina-col" style="color: #34d399;">&lt; 0.5 Seconds</td>
+            <td style="color: #fb923c;">20 - 60 Seconds</td>
+            <td style="color: #f87171;">10 - 20 Minutes</td>
+          </tr>
+          <tr>
+            <td><strong>Privacy &amp; Data Security</strong></td>
+            <td class="lumina-col" style="color: #34d399;">Ephemeral In-Memory Auto-Purge</td>
+            <td style="color: #f87171;">Stored on 3rd party servers</td>
+            <td style="color: #34d399;">Local Only</td>
+          </tr>
+          <tr>
+            <td><strong>Developer REST API</strong></td>
+            <td class="lumina-col" style="color: #34d399;">Included &amp; Documented</td>
+            <td style="color: #f87171;">Paid / None</td>
+            <td style="color: #f87171;">None</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion -->
+  <section class="section-wrapper" id="faq">
+    <div class="section-header">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-subtitle">Everything you need to know about Lumina watermark eradication.</p>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item active">
+        <button class="faq-trigger">
+          <span>What types of watermarks does Lumina remove?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-content">
+          Lumina specifically targets Gamma.app watermarks, including the corner badge images, "Made with Gamma" hyperlinks, and master layout watermarks across both PDF and PPTX slide formats.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger">
+          <span>Will my presentation layout or animations be damaged?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-content">
+          No. Lumina performs selective AST manipulation rather than graphical re-rendering. Your vector icons, custom fonts, color schemes, slide transitions, and animations remain 100% intact.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger">
+          <span>Is there a file size limit?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-content">
+          The default web studio supports files up to 50 MB, which easily accommodates decks with dozens of high-res slides.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger">
+          <span>How is my document data kept private?</span>
+          <span class="material-symbols-outlined faq-icon">expand_more</span>
+        </button>
+        <div class="faq-content">
+          We do not train models on your documents or keep long-term storage. An automated FastAPI background task permanently deletes all temporary files after 60 minutes.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="section-wrapper" style="padding-top: 0;">
+    <div class="cta-banner">
+      <div class="cta-banner-content">
+        <h2 class="cta-banner-title">Ready for Spotless Presentations?</h2>
+        <p class="cta-banner-desc">Jump straight into the studio and sanitize your files in milliseconds.</p>
+      </div>
+      <a href="/index.html" class="btn-primary">
+        <span class="material-symbols-outlined">bolt</span>
+        <span>Open Lumina Studio</span>
       </a>
     </div>
   </section>
 
-  <section class="max-w-6xl mx-auto px-6 pb-32 grid md:grid-cols-3 gap-8">
-    <div class="glass p-8 rounded-2xl">
-      <h3 class="text-xl font-semibold mb-3">
-        ⚡ Instant Processing
-      </h3>
-      <p class="text-gray-400">
-        Remove Gamma watermarks instantly without complicated tools.
-      </p>
-    </div>
-    <div class="glass p-8 rounded-2xl">
-      <h3 class="text-xl font-semibold mb-3">
-        🧠 Smart Detection
-      </h3>
-      <p class="text-gray-400">
-        AI automatically detects the Gamma watermark and removes it cleanly.
-      </p>
-    </div>
-    <div class="glass p-8 rounded-2xl">
-      <h3 class="text-xl font-semibold mb-3">
-        📄 High Quality Output
-      </h3>
-      <p class="text-gray-400">
-        Your slides and PDFs remain intact with original formatting preserved.
-      </p>
-    </div>
-  </section>
+  <!-- Footer -->
+  <footer class="lumina-footer">
+    <div class="footer-container">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--text-highlight);">Lumina AI</span>
+        <span style="color: var(--text-dim); font-size: 13px;">— Powered by Fast Vector Engines.</span>
+      </div>
 
-  <footer class="text-center pb-10 text-gray-500 text-sm">
-    Made by Ankush 850
+      <div class="footer-links">
+        <a href="/index.html" class="footer-link">Studio</a>
+        <a href="/about.html" class="footer-link">Developer API</a>
+        <a href="https://github.com/ankush850" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
+      </div>
+
+      <div style="color: var(--text-dim); font-size: 13px;">
+        Built by Ankush • MIT License
+      </div>
+    </div>
   </footer>
+
+  <!-- Landing JavaScript -->
   <script src="/static/js/landing.js"></script>
 </body>
-
 </html>

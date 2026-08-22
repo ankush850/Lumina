@@ -102,7 +102,7 @@ class PPTXWatermarkDetector:
                 for r in results:
                     if r["is_watermark"]:
                         logger.info(
-                            f"  ✓ {r['location_name']}: {r['shape_name']} ({r['hyperlink']})"
+                            f"  [+] {r['location_name']}: {r['shape_name']} ({r['hyperlink']})"
                         )
             else:
                 logger.info(f"\nNo {self.target_domain} watermarks detected.")
@@ -189,7 +189,7 @@ class PPTXWatermarkDetector:
 
             if is_watermark:
                 logger.info(
-                    f"    ✓ Found watermark: {shape.name} at ({left_pct * 100:.1f}%, {top_pct * 100:.1f}%) -> {hyperlink_url}"
+                    f"    [+] Found watermark: {shape.name} at ({left_pct * 100:.1f}%, {top_pct * 100:.1f}%) -> {hyperlink_url}"
                 )
             else:
                 logger.debug(

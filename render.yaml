@@ -5,7 +5,7 @@ services:
     plan: free
     region: ohio
     branch: main
-    healthCheckPath: /
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 8999

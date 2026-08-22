@@ -65,7 +65,7 @@ class WatermarkRemover:
             if target_domain in uri:
                 page.delete_link(link)
                 removed_count += 1
-                print(f"    ✓ Link removed: {link.get('uri', '')}")
+                print(f"    [+] Link removed: {link.get('uri', '')}")
 
         return removed_count
 
@@ -146,10 +146,10 @@ class WatermarkRemover:
                     page.delete_image(xref)
                     removed_count += 1
                     print(
-                        f"    ✓ Removed image ({img_type}) xref:{xref}: {', '.join(sizes)}"
+                        f"    [+] Removed image ({img_type}) xref:{xref}: {', '.join(sizes)}"
                     )
                 except Exception as e:
-                    print(f"    ✗ Error removing image xref:{xref}: {e}")
+                    print(f"    [X] Error removing image xref:{xref}: {e}")
         else:
             print("    No images with target links found in corner")
 
