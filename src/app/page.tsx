@@ -296,8 +296,8 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="hero">
           <h1>
-            <span className="ln"><span>Security built into</span></span>
-            <span className="ln"><span>every system layer</span></span>
+            <span className="ln"><span>Precision built into</span></span>
+            <span className="ln"><span>every document layer</span></span>
           </h1>
 
           <p className="sub">

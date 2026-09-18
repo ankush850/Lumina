@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lumina — Security built into every system layer",
+  title: "Lumina — Precision built into every document layer",
   description: "Pristine presentations, zero watermarks. Engineered for lossless layout and vector retention.",
   icons: {
     icon: "/favicon.svg",
