@@ -1,254 +1,409 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
-import {
-  Zap,
-  Sparkles,
-  Layers,
-  ShieldCheck,
-  Cpu,
-  FileCheck2,
-  Terminal,
-  ChevronDown,
-  ArrowRight,
-  CheckCircle2,
-} from "lucide-react";
-import ComparisonSlider from "@/components/ComparisonSlider";
 
 export default function LandingPage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const v1Ref = useRef<HTMLVideoElement>(null);
+  const v2Ref = useRef<HTMLVideoElement>(null);
+  const v3Ref = useRef<HTMLVideoElement>(null);
 
-  const toggleFaq = (index: number) => {
-    setOpenFaq(openFaq === index ? null : index);
+  useEffect(() => {
+    // 1. Arm intro class if motion allowed
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      document.documentElement.classList.add("intro");
+    }
+
+    // 2. Video sync
+    const v1 = v1Ref.current;
+    const v2 = v2Ref.current;
+    const v3 = v3Ref.current;
+
+    const handleTimeUpdate = () => {
+      if (!v1) return;
+      const t = v1.currentTime;
+      if (v2 && Math.abs(v2.currentTime - t) > 0.12) v2.currentTime = t;
+      if (v3 && Math.abs(v3.currentTime - t) > 0.12) v3.currentTime = t;
+    };
+
+    if (v1) {
+      v1.addEventListener("timeupdate", handleTimeUpdate);
+    }
+
+    // 3. WAAPI Entrance Choreography
+    const easings = {
+      EXPO: "cubic-bezier(0.16, 1, 0.3, 1)",
+      QUINT: "cubic-bezier(0.22, 1, 0.36, 1)",
+      QUART: "cubic-bezier(0.25, 1, 0.5, 1)",
+      TYPE: "cubic-bezier(0.22, 0.85, 0.24, 1)",
+    };
+
+    const isPhone = window.innerWidth <= 599;
+    const scaleT = isPhone ? 0.86 : 1.0;
+    const dur = (s: number) => s * 1000 * scaleT;
+    const del = (s: number) => s * 1000 * scaleT;
+
+    const probe = document.getElementById("probe");
+    const s = (probe ? probe.getBoundingClientRect().width : 100) / 100;
+
+    const logo = document.querySelector(".logo-link");
+    const navItems = Array.from(document.querySelectorAll(".nav-item"));
+    const burger = document.querySelector(".burger");
+    const btnTop = document.querySelector(".btn-top");
+    const h1Spans = Array.from(document.querySelectorAll(".hero h1 .ln > span"));
+    const sub = document.querySelector(".hero .sub");
+    const btnCta = document.querySelector(".btn-cta");
+    const rules = Array.from(document.querySelectorAll(".stat-rule"));
+    const nums = Array.from(document.querySelectorAll(".s-num"));
+    const labs = Array.from(document.querySelectorAll(".s-lab"));
+
+    const animations: Animation[] = [];
+
+    const teardown = () => {
+      document.documentElement.classList.remove("intro");
+      animations.forEach((a) => {
+        try {
+          a.cancel();
+        } catch {}
+      });
+    };
+
+    const startChoreography = () => {
+      if (logo) {
+        animations.push(
+          logo.animate(
+            [
+              { opacity: 0, transform: "scale(0.9)" },
+              { opacity: 1, transform: "scale(1)" },
+            ],
+            { duration: dur(0.7), delay: del(0), easing: easings.EXPO, fill: "forwards" }
+          )
+        );
+      }
+
+      navItems.forEach((el, i) => {
+        animations.push(
+          el.animate(
+            [
+              { opacity: 0, transform: `translateY(${7 * s}px)` },
+              { opacity: 1, transform: "translateY(0)" },
+            ],
+            { duration: dur(0.62), delay: del(0.12 + i * 0.055), easing: easings.QUINT, fill: "forwards" }
+          )
+        );
+      });
+
+      if (burger) {
+        animations.push(
+          burger.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: dur(0.55),
+            delay: del(0.18),
+            easing: easings.QUART,
+            fill: "forwards",
+          })
+        );
+      }
+
+      if (btnTop) {
+        animations.push(
+          btnTop.animate(
+            [
+              { clipPath: "inset(0 100% 0 0)" },
+              { clipPath: "inset(0 0% 0 0)" },
+            ],
+            { duration: dur(0.66), delay: del(0.28), easing: easings.EXPO, fill: "forwards" }
+          )
+        );
+      }
+
+      h1Spans.forEach((el, i) => {
+        animations.push(
+          el.animate(
+            [
+              { transform: "translateY(120%)" },
+              { transform: "translateY(0)" },
+            ],
+            { duration: dur(0.98), delay: del(0.34 + i * 0.09), easing: easings.TYPE, fill: "forwards" }
+          )
+        );
+      });
+
+      if (sub) {
+        animations.push(
+          sub.animate(
+            [
+              { opacity: 0, transform: `translateY(${14 * s}px)` },
+              { opacity: 1, transform: "translateY(0)" },
+            ],
+            { duration: dur(0.72), delay: del(0.74), easing: easings.QUINT, fill: "forwards" }
+          )
+        );
+      }
+
+      if (btnCta) {
+        animations.push(
+          btnCta.animate(
+            [
+              { clipPath: "inset(0 100% 0 0)" },
+              { clipPath: "inset(0 0% 0 0)" },
+            ],
+            { duration: dur(0.7), delay: del(0.9), easing: easings.EXPO, fill: "forwards" }
+          )
+        );
+      }
+
+      rules.forEach((el, i) => {
+        animations.push(
+          el.animate(
+            [
+              { transform: "scaleY(0)" },
+              { transform: "scaleY(1)" },
+            ],
+            { duration: dur(0.6), delay: del(0.98 + i * 0.07), easing: easings.QUART, fill: "forwards" }
+          )
+        );
+      });
+
+      nums.forEach((el, i) => {
+        animations.push(
+          el.animate(
+            [
+              { opacity: 0, transform: `translateY(${12 * s}px)` },
+              { opacity: 1, transform: "translateY(0)" },
+            ],
+            { duration: dur(0.66), delay: del(1.04 + i * 0.085), easing: easings.QUINT, fill: "forwards" }
+          )
+        );
+      });
+
+      labs.forEach((el, i) => {
+        animations.push(
+          el.animate(
+            [
+              { opacity: 0, transform: `translateY(${10 * s}px)` },
+              { opacity: 1, transform: "translateY(0)" },
+            ],
+            { duration: dur(0.62), delay: del(1.1 + i * 0.085), easing: easings.QUINT, fill: "forwards" }
+          )
+        );
+      });
+
+      setTimeout(teardown, del(1.9));
+    };
+
+    const timer = setTimeout(startChoreography, 60);
+
+    return () => {
+      clearTimeout(timer);
+      if (v1) v1.removeEventListener("timeupdate", handleTimeUpdate);
+      teardown();
+    };
+  }, []);
+
+  const toggleMenu = () => {
+    document.body.classList.toggle("nav-open");
   };
 
-  const faqs = [
-    {
-      q: "Does Lumina damage slide layouts, animations, or vector fonts?",
-      a: "Not at all. Lumina operates by directly analyzing the underlying OpenXML structure in PowerPoint presentations and the vector object trees in PDFs. It targets exclusively the Gamma watermark nodes and hyperlinks, leaving all user content, animations, typography, and charts completely intact.",
-    },
-    {
-      q: "How does the detection engine distinguish watermarks from normal elements?",
-      a: "Gamma inserts watermarks inside slide layouts and master slides with specific hyperlink metadata (`gamma.app/?utm_source=made-with-gamma`) and corner bounding boxes. Our multi-pass detector inspects both geometry coordinates and metadata URLs to achieve 100% precision with zero false positives.",
-    },
-    {
-      q: "Are my uploaded presentations stored or monitored?",
-      a: "Zero retention. Files are processed entirely in ephemeral system memory. Lumina runs an automated background cleanup cycle every hour to permanently shred temporary files from the filesystem.",
-    },
-    {
-      q: "Can I use Lumina programmatically via API?",
-      a: "Yes! Lumina includes a fully documented REST API (`POST /api/remove-watermark`) capable of headless batch processing and integration into custom publishing pipelines. Visit our API Docs page for cURL, Python, and JavaScript snippets.",
-    },
-  ];
+  const closeMenu = () => {
+    document.body.classList.remove("nav-open");
+  };
+
+  const toggleAccordion = (id: string) => {
+    const panel = document.getElementById("panel-" + id);
+    const item = document.getElementById("item-" + id);
+    const isCurrentlyOpen = panel?.classList.contains("open");
+
+    document.querySelectorAll(".accordion-panel").forEach((p) => p.classList.remove("open"));
+    document.querySelectorAll(".menu-item").forEach((i) => i.classList.remove("accordion-open"));
+
+    if (!isCurrentlyOpen && panel && item) {
+      panel.classList.add("open");
+      item.classList.add("accordion-open");
+    }
+  };
 
   return (
-    <main className="main-wrapper" style={{ maxWidth: "1100px" }}>
-      {/* Hero Section */}
-      <section className="hero-header" style={{ marginBottom: "64px" }}>
-        <div className="hero-pill-badge">
-          <div className="pulse-dot-cyan" />
-          <span>Gamma AI Sanitizer v2.5 Online</span>
-        </div>
+    <div className="screen">
+      <div id="probe" style={{ position: "absolute", visibility: "hidden", width: "calc(100 * var(--s))" }} />
 
-        <h1 className="hero-title">
-          Pristine Presentations, <br />
-          <span className="gradient-title">Zero Watermarks</span> in Seconds
-        </h1>
+      {/* Primary Video Background */}
+      <div className="bg">
+        <video ref={v1Ref} autoPlay muted loop playsInline preload="auto">
+          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_132544_b6ef0174-ed95-45ad-9a2f-ccb8acfbdce8.mp4" type="video/mp4" />
+        </video>
+      </div>
 
-        <p className="hero-subtitle" style={{ marginBottom: "36px" }}>
-          The intelligent document sanitization engine that scrubs hard-coded Gamma.app watermarks from PowerPoint (.pptx) and PDF documents with lossless vector retention.
-        </p>
+      {/* Second Pass Video Background */}
+      <div className="bg2">
+        <video ref={v2Ref} autoPlay muted loop playsInline preload="auto">
+          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_132544_b6ef0174-ed95-45ad-9a2f-ccb8acfbdce8.mp4" type="video/mp4" />
+        </video>
+      </div>
 
-        <div style={{ display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap" }}>
-          <Link
-            href="/studio"
-            className="btn-primary"
-            style={{ width: "auto", padding: "14px 32px", fontSize: "16px", borderRadius: "var(--radius-full)" }}
-          >
-            <Zap size={18} />
-            <span>Launch Studio Free</span>
+      {/* Scrim Overlay */}
+      <div className="scrim" />
+
+      {/* Fullscreen UI Frame */}
+      <div className="frame">
+        <header className="lumina-header">
+          {/* Logo */}
+          <Link href="/" className="logo-link" aria-label="Lumina Home">
+            <svg className="logo-svg" viewBox="0 0 46 46" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="butt" strokeLinejoin="miter">
+              <g transform="rotate(0 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+              <g transform="rotate(90 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+              <g transform="rotate(180 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+              <g transform="rotate(270 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+            </svg>
+            <span className="brand-text">LUMINA</span>
           </Link>
-          <Link
-            href="/docs"
-            className="btn-secondary"
-            style={{ borderRadius: "var(--radius-full)", padding: "14px 28px" }}
-          >
-            <Terminal size={16} />
-            <span>Developer REST API</span>
+
+          {/* Nav */}
+          <nav className="lumina-nav">
+            <Link href="/" className="nav-item">Home</Link>
+            <Link href="/docs" className="nav-item">
+              <span>Resources</span>
+              <svg className="nav-chevron" viewBox="0 0 11 6"><path d="M1 1L5.5 5L10 1" /></svg>
+            </Link>
+            <Link href="/studio" className="nav-item">
+              <span>Benefits</span>
+              <svg className="nav-chevron" viewBox="0 0 11 6"><path d="M1 1L5.5 5L10 1" /></svg>
+            </Link>
+            <a href="https://github.com/ankush850/Lumina" target="_blank" rel="noopener noreferrer" className="nav-item">
+              Contact
+            </a>
+          </nav>
+
+          {/* Top CTA */}
+          <Link href="/studio" className="btn btn-top">
+            <span className="btn-label">Secure system</span>
+            <svg className="btn-arrow" viewBox="0 0 22 18">
+              <path d="M0 9H20.1" />
+              <path d="M12.1 1L20.1 9L12.1 17" />
+            </svg>
           </Link>
-        </div>
-      </section>
 
-      {/* Metrics Banner */}
-      <section className="stats-banner">
-        <div className="stat-item">
-          <span className="stat-item-num">10,000+</span>
-          <span className="stat-item-label">Presentations Sanitized</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-item-num">100%</span>
-          <span className="stat-item-label">Vector Fidelity Retained</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-item-num">&lt; 1.2s</span>
-          <span className="stat-item-label">Average Processing Latency</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-item-num">0</span>
-          <span className="stat-item-label">Quality Loss or Blurring</span>
-        </div>
-      </section>
+          {/* Mobile Burger */}
+          <button className="burger" onClick={toggleMenu} aria-label="Toggle menu">
+            <span className="burger-bar" />
+            <span className="burger-bar" />
+            <span className="burger-bar" />
+          </button>
+        </header>
 
-      {/* Interactive Comparison Slider */}
-      <section style={{ marginBottom: "72px" }}>
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div className="hero-pill-badge" style={{ marginBottom: "12px" }}>
-            <Sparkles size={14} />
-            <span>Interactive Comparison</span>
-          </div>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 700, color: "#ffffff" }}>
-            Slide Master Precision Scrubbing
-          </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "15px" }}>
-            Drag the divider to see how Lumina removes the watermark while maintaining 100% visual fidelity.
+        <div className="sp sp-a" />
+
+        {/* Hero Section */}
+        <section className="hero">
+          <h1>
+            <span className="ln"><span>Security built into</span></span>
+            <span className="ln"><span>every system layer</span></span>
+          </h1>
+
+          <p className="sub">
+            {"Engineered to stay resilient, controlled,\nand uncompromised under pressure."}
           </p>
-        </div>
 
-        <ComparisonSlider />
-      </section>
+          <Link href="/studio" className="btn btn-cta">
+            <span className="btn-label">Secure system</span>
+            <svg className="btn-arrow" viewBox="0 0 22 18">
+              <path d="M0 9H20.1" />
+              <path d="M12.1 1L20.1 9L12.1 17" />
+            </svg>
+          </Link>
+        </section>
 
-      {/* 3-Step Visual Processing Pipeline */}
-      <section style={{ marginBottom: "72px" }}>
-        <div style={{ textAlign: "center", marginBottom: "36px" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 700, color: "#ffffff" }}>
-            How Lumina Sanitizes Documents
-          </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "15px" }}>
-            Three streamlined steps powered by OpenXML and PyMuPDF vector parsers.
-          </p>
-        </div>
+        <div className="sp sp-b" />
 
-        <div className="pipeline-grid">
-          <div className="pipeline-card">
-            <span className="pipeline-step-badge">STEP 01</span>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff" }}>Document Upload</h3>
-            <p style={{ color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.6" }}>
-              Drop any `.pptx` or `.pdf` presentation up to 50MB into the studio workspace or pass via REST API.
-            </p>
+        {/* Stats Section */}
+        <section className="stats">
+          <div className="stat-item s1">
+            <span className="s-num">300+</span>
+            <span className="s-lab">Clients</span>
           </div>
 
-          <div className="pipeline-card">
-            <span className="pipeline-step-badge">STEP 02</span>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff" }}>AST &amp; Layout Inspection</h3>
-            <p style={{ color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.6" }}>
-              Our engine parses Slide Master XML and PDF vector streams to pinpoint specific Gamma hyperlinked overlay nodes.
-            </p>
+          <div className="stat-rule r1" />
+
+          <div className="stat-item s2">
+            <span className="s-num">99%</span>
+            <span className="s-lab">Satisfaction</span>
           </div>
 
-          <div className="pipeline-card">
-            <span className="pipeline-step-badge">STEP 03</span>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff" }}>Lossless Export</h3>
-            <p style={{ color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.6" }}>
-              The purged document is repacked and served for instant download, completely clean and watermark-free.
-            </p>
+          <div className="stat-rule r2" />
+
+          <div className="stat-item s3">
+            <span className="s-num">$5M+</span>
+            <span className="s-lab">Revenue</span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Feature Highlights Grid */}
-      <section style={{ marginBottom: "80px" }}>
-        <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 700, color: "#ffffff" }}>
-            Engineered for Flawless Presentations
-          </h2>
-        </div>
+        <div className="sp sp-c" />
+      </div>
 
-        <div className="features-grid-3">
-          <div className="feature-box">
-            <div className="feature-icon-wrapper">
-              <Layers size={22} />
-            </div>
-            <h3 className="feature-title">Smart Master Detection</h3>
-            <p className="feature-desc">
-              Intelligently traverses PowerPoint Slide Masters, Layout XML, and PDF bounding boxes to isolate Gamma links without touching user slides.
-            </p>
-          </div>
-
-          <div className="feature-box">
-            <div className="feature-icon-wrapper">
-              <Cpu size={22} />
-            </div>
-            <h3 className="feature-title">Lossless Vector Retention</h3>
-            <p className="feature-desc">
-              Retains crisp vector shapes, embedded typography, animations, and high-resolution media. Zero rasterization or blurriness.
-            </p>
-          </div>
-
-          <div className="feature-box">
-            <div className="feature-icon-wrapper">
-              <ShieldCheck size={22} />
-            </div>
-            <h3 className="feature-title">Ephemeral Privacy</h3>
-            <p className="feature-desc">
-              Files are processed in ephemeral memory. Automated background cleanup destroys all temporary files post-export.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Frequently Asked Questions */}
-      <section style={{ marginBottom: "80px" }}>
-        <div style={{ textAlign: "center", marginBottom: "36px" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 700, color: "#ffffff" }}>
-            Frequently Asked Questions
-          </h2>
+      {/* Mobile Menu Overlay */}
+      <div className="menu" id="menu">
+        <div className="menu-tex">
+          <video ref={v3Ref} autoPlay muted loop playsInline preload="auto">
+            <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_132544_b6ef0174-ed95-45ad-9a2f-ccb8acfbdce8.mp4" type="video/mp4" />
+          </video>
         </div>
 
-        <div className="faq-list">
-          {faqs.map((faq, idx) => (
-            <div key={idx} className="faq-item">
-              <button className="faq-question" onClick={() => toggleFaq(idx)}>
-                <span>{faq.q}</span>
-                <ChevronDown
-                  size={18}
-                  style={{
-                    transform: openFaq === idx ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s ease",
-                  }}
-                />
+        <div className="menu-rule" />
+
+        <div className="menu-content">
+          <div className="menu-eyebrow">MENU</div>
+
+          <ul className="menu-list">
+            <li className="menu-item">
+              <Link href="/" className="mrow" onClick={closeMenu}>Home</Link>
+            </li>
+
+            <li className="menu-item" id="item-resources">
+              <button className="mrow" type="button" onClick={() => toggleAccordion("resources")}>
+                <span>Resources</span>
+                <svg className="m-chevron" viewBox="0 0 14 9"><path d="M1 1L7 7L13 1" /></svg>
               </button>
-              {openFaq === idx && <div className="faq-answer">{faq.a}</div>}
-            </div>
-          ))}
-        </div>
-      </section>
+              <div className="accordion-panel" id="panel-resources">
+                <Link href="/docs" className="sublink" onClick={closeMenu}>Documentation</Link>
+                <Link href="/docs" className="sublink" onClick={closeMenu}>Threat reports</Link>
+                <Link href="/docs" className="sublink" onClick={closeMenu}>Changelog</Link>
+              </div>
+            </li>
 
-      {/* Bottom CTA Banner */}
-      <section
-        className="glass-card"
-        style={{
-          textAlign: "center",
-          padding: "54px 32px",
-          background: "linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%)",
-          border: "1px solid rgba(139, 92, 246, 0.3)",
-        }}
-      >
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "36px", fontWeight: 800, color: "#ffffff", marginBottom: "16px" }}>
-          Ready to export pristine presentations?
-        </h2>
-        <p style={{ color: "var(--text-muted)", fontSize: "16px", marginBottom: "28px", maxWidth: "600px", margin: "0 auto 28px" }}>
-          Open the Lumina Studio now to process single files or batch queues in seconds.
-        </p>
-        <Link
-          href="/studio"
-          className="btn-primary"
-          style={{ width: "auto", padding: "14px 36px", fontSize: "16px", borderRadius: "var(--radius-full)" }}
-        >
-          <span>Launch Lumina Studio</span>
-          <ArrowRight size={18} />
-        </Link>
-      </section>
-    </main>
+            <li className="menu-item" id="item-benefits">
+              <button className="mrow" type="button" onClick={() => toggleAccordion("benefits")}>
+                <span>Benefits</span>
+                <svg className="m-chevron" viewBox="0 0 14 9"><path d="M1 1L7 7L13 1" /></svg>
+              </button>
+              <div className="accordion-panel" id="panel-benefits">
+                <Link href="/studio" className="sublink" onClick={closeMenu}>Continuous monitoring</Link>
+                <Link href="/studio" className="sublink" onClick={closeMenu}>Access control</Link>
+                <Link href="/studio" className="sublink" onClick={closeMenu}>Incident response</Link>
+              </div>
+            </li>
+
+            <li className="menu-item">
+              <a href="https://github.com/ankush850/Lumina" target="_blank" rel="noopener noreferrer" className="mrow" onClick={closeMenu}>
+                Contact
+              </a>
+            </li>
+          </ul>
+
+          <div className="menu-footer">
+            <Link href="/studio" className="btn btn-menu" onClick={closeMenu}>
+              <span className="btn-label">Secure system</span>
+              <svg className="btn-arrow" viewBox="0 0 22 18">
+                <path d="M0 9H20.1" />
+                <path d="M12.1 1L20.1 9L12.1 17" />
+              </svg>
+            </Link>
+            <div className="menu-note">300+ clients &nbsp;/&nbsp; 99% satisfaction</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

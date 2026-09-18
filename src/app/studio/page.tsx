@@ -1,22 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import {
-  Sparkles,
-  UploadCloud,
-  FileText,
-  X,
-  Wand2,
-  CheckCircle2,
-  Download,
-  RotateCcw,
-  Play,
-  Layers,
-  ShieldCheck,
-  Cpu,
-  Loader2,
-} from "lucide-react";
-import ToastContainer, { ToastMessage } from "@/components/Toast";
+import { useState, useRef } from "react";
+import Link from "next/link";
 
 interface BatchItem {
   id: string;
@@ -44,9 +29,6 @@ interface ProcessResponse {
 export default function StudioPage() {
   const [activeTab, setActiveTab] = useState<"single" | "batch">("single");
   const [isDragOver, setIsDragOver] = useState(false);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  // Single file states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progressPct, setProgressPct] = useState(0);
@@ -60,18 +42,6 @@ export default function StudioPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const addToast = (text: string, type: "success" | "error" | "info" = "info") => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, type, text }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
   const formatBytes = (bytes: number, decimals = 2) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -84,10 +54,10 @@ export default function StudioPage() {
   const validateFile = (file: File) => {
     const ext = (file.name.split(".").pop() || "").toLowerCase();
     if (!["pdf", "pptx"].includes(ext)) {
-      return { valid: false, message: "Invalid format. Please select a .pdf or .pptx file." };
+      return { valid: false, message: "Invalid format. Select .pdf or .pptx." };
     }
     if (file.size > 50 * 1024 * 1024) {
-      return { valid: false, message: "File exceeds 50MB maximum size limit." };
+      return { valid: false, message: "Exceeds 50MB maximum size limit." };
     }
     return { valid: true, ext };
   };
@@ -98,12 +68,11 @@ export default function StudioPage() {
       if (!file) return;
       const val = validateFile(file);
       if (!val.valid) {
-        addToast(val.message!, "error");
+        alert(val.message);
         return;
       }
       setSelectedFile(file);
       setProcessResult(null);
-      addToast(`Loaded "${file.name}"`, "info");
     } else {
       const newItems: BatchItem[] = [];
       Array.from(files).forEach((file) => {
@@ -115,13 +84,10 @@ export default function StudioPage() {
             ext: val.ext!,
             status: "ready",
           });
-        } else {
-          addToast(`${file.name}: ${val.message}`, "error");
         }
       });
       if (newItems.length > 0) {
         setBatchItems((prev) => [...prev, ...newItems]);
-        addToast(`Added ${newItems.length} file(s) to batch queue`, "info");
       }
     }
   };
@@ -135,26 +101,25 @@ export default function StudioPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Single file process trigger
   const processSingleFile = async () => {
     if (!selectedFile || isProcessing) return;
     setIsProcessing(true);
     setProcessResult(null);
-    setProgressPct(15);
+    setProgressPct(20);
     setProgressStep(0);
-    setProgressText("Scanning presentation structures & slide masters...");
+    setProgressText("PARSING OPENXML PRESENTATION STRUCTURES...");
 
     const t1 = setTimeout(() => {
-      setProgressPct(45);
+      setProgressPct(55);
       setProgressStep(1);
-      setProgressText("Detecting Gamma watermark hyperlinks & overlays...");
-    }, 500);
+      setProgressText("IDENTIFYING WATERMARK HYPERLINK OVERLAYS...");
+    }, 400);
 
     const t2 = setTimeout(() => {
-      setProgressPct(75);
+      setProgressPct(85);
       setProgressStep(2);
-      setProgressText("Purging watermark nodes & preserving vector paths...");
-    }, 1100);
+      setProgressText("PURGING WATERMARK NODES & UNLINKING RELATIONS...");
+    }, 900);
 
     try {
       const formData = new FormData();
@@ -173,13 +138,12 @@ export default function StudioPage() {
       if (res.ok && data.status === "success") {
         setProgressPct(100);
         setProgressStep(3);
-        setProgressText("Sanitization complete! Finalizing output...");
+        setProgressText("SANITIZATION COMPLETE. PREPARING DOWNLOAD.");
 
         setTimeout(() => {
           setIsProcessing(false);
           setProcessResult(data);
-          addToast(data.message || "Watermarks removed cleanly!", "success");
-        }, 500);
+        }, 400);
       } else {
         throw new Error(data.message || "Watermark removal failed on server.");
       }
@@ -187,15 +151,13 @@ export default function StudioPage() {
       clearTimeout(t1);
       clearTimeout(t2);
       setIsProcessing(false);
-      addToast(err.message || "Failed to process document.", "error");
+      alert(err.message || "Failed to process document.");
     }
   };
 
-  // Batch process trigger
   const processBatchQueue = async () => {
     if (batchItems.length === 0 || isBatchProcessing) return;
     setIsBatchProcessing(true);
-    let successCount = 0;
 
     for (let i = 0; i < batchItems.length; i++) {
       const item = batchItems[i];
@@ -217,7 +179,6 @@ export default function StudioPage() {
         const data = await res.json();
 
         if (res.ok && data.status === "success") {
-          successCount++;
           setBatchItems((prev) =>
             prev.map((b, idx) =>
               idx === i ? { ...b, status: "done", result: data } : b
@@ -235,387 +196,344 @@ export default function StudioPage() {
       }
     }
 
-    addToast(`Batch complete: ${successCount}/${batchItems.length} files processed.`, "success");
     setIsBatchProcessing(false);
   };
 
-  const removeBatchItem = (id: string) => {
-    setBatchItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
   return (
-    <main className="main-wrapper">
-      {/* Toast Notifications */}
-      <ToastContainer toasts={toasts} onDismiss={removeToast} />
+    <div style={{ minHeight: "100vh", background: "#000", color: "#fff", position: "relative" }}>
+      {/* Navigation Bar */}
+      <div className="brutalist-nav">
+        <Link href="/" className="logo-link" style={{ position: "static" }}>
+          <svg className="logo-svg" style={{ width: "32px", height: "32px" }} viewBox="0 0 46 46" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="butt" strokeLinejoin="miter">
+            <g transform="rotate(0 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+            <g transform="rotate(90 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+            <g transform="rotate(180 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+            <g transform="rotate(270 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+          </svg>
+          <span className="brand-text" style={{ fontSize: "18px" }}>LUMINA STUDIO</span>
+        </Link>
 
-      {/* Hero Header */}
-      <section className="hero-header">
-        <div className="hero-pill-badge">
-          <Sparkles size={15} />
-          <span>Gamma AI &amp; Presentation Sanitizer</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <Link href="/" style={{ color: "var(--lab)", textDecoration: "none", fontSize: "14px" }}>
+            Home
+          </Link>
+          <Link href="/docs" style={{ color: "var(--lab)", textDecoration: "none", fontSize: "14px" }}>
+            Documentation
+          </Link>
+          <span className="badge-tag red">SYSTEM ONLINE</span>
         </div>
-        <h1 className="hero-title">
-          Clean Documents, <br />
-          <span className="gradient-title">Zero Watermarks</span>
-        </h1>
-        <p className="hero-subtitle">
-          Drop your PowerPoint (.pptx) or PDF files below. Our engine parses slide masters, eliminates Gamma hyperlinks, and exports pristine presentations in milliseconds.
-        </p>
-      </section>
+      </div>
 
-      {/* Central Studio Workspace Card */}
-      <section className="studio-card">
-        {/* Mode Selector Tabs */}
-        <div className="studio-tabs">
-          <button
-            className={`tab-btn ${activeTab === "single" ? "active" : ""}`}
-            onClick={() => {
-              if (isProcessing || isBatchProcessing) return;
-              setActiveTab("single");
-            }}
-          >
-            <FileText size={15} />
-            <span>Single Document</span>
-          </button>
-          <button
-            className={`tab-btn ${activeTab === "batch" ? "active" : ""}`}
-            onClick={() => {
-              if (isProcessing || isBatchProcessing) return;
-              setActiveTab("batch");
-            }}
-          >
-            <Layers size={15} />
-            <span>Batch Queue</span>
-          </button>
+      <main className="subpage-container">
+        {/* Eyebrow & Title */}
+        <div style={{ marginBottom: "36px" }}>
+          <div className="badge-tag" style={{ marginBottom: "12px" }}>
+            SYSTEM LAYER: SANITIZATION CONTROLLER
+          </div>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "40px", fontWeight: 700, letterSpacing: "-1px" }}>
+            Document Sanitizer
+          </h1>
+          <p style={{ color: "var(--sub)", fontSize: "16px", marginTop: "8px", maxWidth: "680px" }}>
+            Drop PPTX or PDF presentations to automatically purge Gamma watermarks without corrupting slide geometry or vector fonts.
+          </p>
         </div>
 
-        {/* SINGLE MODE */}
-        {activeTab === "single" && (
-          <div>
-            {/* DropZone */}
-            {!selectedFile && (
+        {/* Tab Controls */}
+        <div style={{ display: "flex", gap: "2px", marginBottom: "24px", background: "rgba(255,255,255,0.06)", width: "fit-content" }}>
+          <button
+            style={{
+              padding: "10px 24px",
+              background: activeTab === "single" ? "var(--red)" : "transparent",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono)",
+              fontSize: "13px",
+              fontWeight: 500,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+            onClick={() => setActiveTab("single")}
+          >
+            [01] Single File
+          </button>
+          <button
+            style={{
+              padding: "10px 24px",
+              background: activeTab === "batch" ? "var(--red)" : "transparent",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono)",
+              fontSize: "13px",
+              fontWeight: 500,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+            onClick={() => setActiveTab("batch")}
+          >
+            [02] Batch Queue
+          </button>
+        </div>
+
+        {/* Workspace Card */}
+        <div className="brutalist-card">
+          {activeTab === "single" && (
+            <div>
+              {!selectedFile && (
+                <div
+                  className={`brutalist-dropzone ${isDragOver ? "dragover" : ""}`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                  onDragLeave={() => setIsDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragOver(false);
+                    if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+                  }}
+                >
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".pdf,.pptx"
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                      if (e.target.files?.length) handleFiles(e.target.files);
+                    }}
+                  />
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "var(--lab)", marginBottom: "8px" }}>
+                    [ CLICK TO BROWSE OR DRAG &amp; DROP ]
+                  </div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: "#fff", marginBottom: "12px" }}>
+                    Select PowerPoint (.pptx) or PDF File
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center", gap: "8px" }}>
+                    <span className="badge-tag">.PPTX</span>
+                    <span className="badge-tag">.PDF</span>
+                    <span className="badge-tag">MAX 50MB</span>
+                  </div>
+                </div>
+              )}
+
+              {selectedFile && !isProcessing && !processResult && (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", background: "#000", border: "1px solid var(--border)", marginBottom: "20px" }}>
+                    <div>
+                      <div style={{ fontSize: "16px", fontWeight: 600, color: "#fff" }}>{selectedFile.name}</div>
+                      <div style={{ fontSize: "12px", color: "var(--lab)", marginTop: "4px" }}>
+                        {selectedFile.name.split(".").pop()?.toUpperCase()} &bull; {formatBytes(selectedFile.size)}
+                      </div>
+                    </div>
+                    <button
+                      onClick={resetWorkspace}
+                      style={{ background: "none", border: "none", color: "var(--red)", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "13px" }}
+                    >
+                      [ REMOVE ]
+                    </button>
+                  </div>
+
+                  <button
+                    className="btn"
+                    onClick={processSingleFile}
+                    style={{ width: "100%", height: "54px", justifyContent: "center" }}
+                  >
+                    <span className="btn-label" style={{ textAlign: "center" }}>EXECUTE WATERMARK PURGE</span>
+                    <svg className="btn-arrow" viewBox="0 0 22 18"><path d="M0 9H20.1" /><path d="M12.1 1L20.1 9L12.1 17" /></svg>
+                  </button>
+                </div>
+              )}
+
+              {isProcessing && (
+                <div style={{ padding: "24px 0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px", fontFamily: "var(--font-mono)", fontSize: "12px" }}>
+                    <span style={{ color: "var(--red)" }}>&gt; {progressText}</span>
+                    <span>{progressPct}%</span>
+                  </div>
+
+                  <div style={{ width: "100%", height: "4px", background: "rgba(255,255,255,0.1)", marginBottom: "24px" }}>
+                    <div style={{ width: `${progressPct}%`, height: "100%", background: "var(--red)", transition: "width 0.3s ease" }} />
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
+                    {["01. SCAN XML", "02. DETECT OVERLAYS", "03. PURGE NODES", "04. FINALIZE"].map((step, idx) => (
+                      <div
+                        key={step}
+                        style={{
+                          padding: "10px",
+                          border: "1px solid var(--border)",
+                          background: idx === progressStep ? "rgba(200,27,28,0.15)" : idx < progressStep ? "rgba(255,255,255,0.04)" : "transparent",
+                          borderColor: idx === progressStep ? "var(--red)" : "var(--border)",
+                          fontSize: "11px",
+                          fontFamily: "var(--font-mono)",
+                          textAlign: "center",
+                          color: idx === progressStep ? "var(--red)" : idx < progressStep ? "#fff" : "var(--lab)",
+                        }}
+                      >
+                        {step}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {processResult && (
+                <div>
+                  <div style={{ padding: "14px 18px", border: "1px solid var(--red)", background: "rgba(200,27,28,0.08)", color: "#fff", marginBottom: "24px", fontFamily: "var(--font-mono)", fontSize: "13px" }}>
+                    &check; SANITIZATION COMPLETE: {processResult.message || "Watermark successfully unlinked from presentation schema."}
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "28px" }}>
+                    <div style={{ padding: "16px", border: "1px solid var(--border)", background: "#000" }}>
+                      <div style={{ fontSize: "11px", color: "var(--lab)", fontFamily: "var(--font-mono)" }}>WATERMARKS REMOVED</div>
+                      <div style={{ fontSize: "28px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--red)", marginTop: "4px" }}>
+                        {processResult.watermarks_removed ?? 0}
+                      </div>
+                    </div>
+                    <div style={{ padding: "16px", border: "1px solid var(--border)", background: "#000" }}>
+                      <div style={{ fontSize: "11px", color: "var(--lab)", fontFamily: "var(--font-mono)" }}>LAYOUTS CLEANED</div>
+                      <div style={{ fontSize: "28px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "#fff", marginTop: "4px" }}>
+                        {processResult.layouts_processed ?? 0}
+                      </div>
+                    </div>
+                    <div style={{ padding: "16px", border: "1px solid var(--border)", background: "#000" }}>
+                      <div style={{ fontSize: "11px", color: "var(--lab)", fontFamily: "var(--font-mono)" }}>FORMAT</div>
+                      <div style={{ fontSize: "28px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "#fff", marginTop: "4px" }}>
+                        {(processResult.file_type || "PPTX").toUpperCase()}
+                      </div>
+                    </div>
+                    <div style={{ padding: "16px", border: "1px solid var(--border)", background: "#000" }}>
+                      <div style={{ fontSize: "11px", color: "var(--lab)", fontFamily: "var(--font-mono)" }}>LATENCY</div>
+                      <div style={{ fontSize: "28px", fontWeight: 700, fontFamily: "var(--font-mono)", color: "#fff", marginTop: "4px" }}>
+                        {processResult.processing_time || "0.08s"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "12px" }}>
+                    {processResult.download_url && (
+                      <a
+                        href={processResult.download_url}
+                        download={`clean_${selectedFile?.name || "document"}`}
+                        className="btn"
+                        style={{ flex: 1, height: "52px", justifyContent: "center" }}
+                      >
+                        <span className="btn-label" style={{ textAlign: "center" }}>DOWNLOAD CLEAN PRESENTATION</span>
+                        <svg className="btn-arrow" viewBox="0 0 22 18"><path d="M0 9H20.1" /><path d="M12.1 1L20.1 9L12.1 17" /></svg>
+                      </a>
+                    )}
+                    <button
+                      onClick={resetWorkspace}
+                      style={{
+                        padding: "0 24px",
+                        background: "transparent",
+                        border: "1px solid var(--border)",
+                        color: "#fff",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      [ RESET ]
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "batch" && (
+            <div>
               <div
-                className={`dropzone-container ${isDragOver ? "dragover" : ""}`}
+                className="brutalist-dropzone"
                 onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setIsDragOver(true);
-                }}
-                onDragLeave={() => setIsDragOver(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setIsDragOver(false);
-                  if (e.dataTransfer.files.length) {
-                    handleFiles(e.dataTransfer.files);
-                  }
-                }}
+                style={{ marginBottom: "20px" }}
               >
                 <input
                   type="file"
                   ref={fileInputRef}
                   accept=".pdf,.pptx"
+                  multiple
                   style={{ display: "none" }}
                   onChange={(e) => {
-                    if (e.target.files && e.target.files.length) {
-                      handleFiles(e.target.files);
-                    }
+                    if (e.target.files?.length) handleFiles(e.target.files);
                   }}
                 />
-                <div className="dropzone-icon-box">
-                  <UploadCloud size={36} />
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--lab)", marginBottom: "4px" }}>
+                  [ BATCH INGESTION ]
                 </div>
-                <h3 className="dropzone-heading">Drag &amp; Drop your document here</h3>
-                <p className="dropzone-subtext">or click anywhere inside this box to browse local files</p>
-
-                <div className="supported-badges">
-                  <span className="format-pill pdf">.PDF</span>
-                  <span className="format-pill pptx">.PPTX</span>
-                  <span className="format-pill">Max 50 MB</span>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: 700, color: "#fff" }}>
+                  Select multiple .pptx and .pdf files to queue
                 </div>
               </div>
-            )}
 
-            {/* Selected File Card */}
-            {selectedFile && !isProcessing && !processResult && (
-              <div>
-                <div className="file-preview-card">
-                  <div className="file-info-group">
-                    <div className={`file-type-icon ${selectedFile.name.split(".").pop()?.toLowerCase()}`}>
-                      {selectedFile.name.split(".").pop()?.toUpperCase()}
-                    </div>
-                    <div className="file-details">
-                      <span className="file-name">{selectedFile.name}</span>
-                      <span className="file-meta-text">
-                        {selectedFile.name.split(".").pop()?.toUpperCase()} • {formatBytes(selectedFile.size)}
-                      </span>
-                    </div>
-                  </div>
-                  <button className="btn-icon" onClick={resetWorkspace} title="Remove file">
-                    <X size={18} />
-                  </button>
-                </div>
-
-                <div style={{ marginTop: "20px" }}>
-                  <button className="btn-primary" onClick={processSingleFile}>
-                    <Wand2 size={18} />
-                    <span>Process Document with Lumina AI</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Multi-step Processing Stepper */}
-            {isProcessing && (
-              <div className="stepper-container">
-                <div className="stepper-status-header">
-                  <div className="stepper-label">
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>{progressText}</span>
-                  </div>
-                  <span className="stepper-percent">{progressPct}%</span>
-                </div>
-
-                <div className="stepper-track">
-                  <div className="stepper-fill" style={{ width: `${progressPct}%` }} />
-                </div>
-
-                <div className="stepper-steps-grid">
-                  <div className={`step-card ${progressStep === 0 ? "active" : progressStep > 0 ? "completed" : ""}`}>
-                    01. AST Scan
-                  </div>
-                  <div className={`step-card ${progressStep === 1 ? "active" : progressStep > 1 ? "completed" : ""}`}>
-                    02. Detect Overlays
-                  </div>
-                  <div className={`step-card ${progressStep === 2 ? "active" : progressStep > 2 ? "completed" : ""}`}>
-                    03. Purge Nodes
-                  </div>
-                  <div className={`step-card ${progressStep === 3 ? "active" : progressStep > 3 ? "completed" : ""}`}>
-                    04. Finalize
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Completion & Results Dashboard */}
-            {processResult && (
-              <div className="completion-container">
-                <div className="completion-badge">
-                  <CheckCircle2 size={16} />
-                  <span>Sanitization Complete • 100% Layout Integrity</span>
-                </div>
-
-                <div className="stats-grid">
-                  <div className="stat-box">
-                    <span className="stat-label">Watermarks Removed</span>
-                    <span className="stat-number purple">
-                      {processResult.watermarks_removed ?? 0}
+              {batchItems.length > 0 && (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "13px", fontFamily: "var(--font-mono)", color: "var(--lab)" }}>
+                      QUEUE COUNT: {batchItems.length}
                     </span>
-                  </div>
-                  <div className="stat-box">
-                    <span className="stat-label">Layouts Cleaned</span>
-                    <span className="stat-number cyan">
-                      {processResult.layouts_processed ?? 0}
-                    </span>
-                  </div>
-                  <div className="stat-box">
-                    <span className="stat-label">Output Format</span>
-                    <span className="stat-number">
-                      {(processResult.file_type || selectedFile?.name.split(".").pop() || "PDF").toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="stat-box">
-                    <span className="stat-label">Latency</span>
-                    <span className="stat-number green">
-                      {processResult.processing_time || "< 1.2s"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="completion-actions">
-                  {processResult.download_url && (
-                    <a
-                      href={processResult.download_url}
-                      download={`clean_${selectedFile?.name || "document"}`}
-                      className="btn-primary download-cta-btn"
+                    <button
+                      className="btn"
+                      onClick={processBatchQueue}
+                      disabled={isBatchProcessing}
+                      style={{ width: "auto", height: "42px", padding: "0 24px" }}
                     >
-                      <Download size={18} />
-                      <span>Download Clean Document</span>
-                    </a>
-                  )}
-                  <button
-                    className="btn-secondary"
-                    onClick={resetWorkspace}
-                    style={{ flex: "0 0 auto" }}
-                  >
-                    <RotateCcw size={16} />
-                    <span>Process Another</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+                      <span className="btn-label">{isBatchProcessing ? "PURGING QUEUE..." : "PURGE ALL QUEUED FILES"}</span>
+                    </button>
+                  </div>
 
-        {/* BATCH MODE */}
-        {activeTab === "batch" && (
-          <div>
-            {/* Batch DropZone */}
-            <div
-              className={`dropzone-container ${isDragOver ? "dragover" : ""}`}
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDragOver(true);
-              }}
-              onDragLeave={() => setIsDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setIsDragOver(false);
-                if (e.dataTransfer.files.length) {
-                  handleFiles(e.dataTransfer.files);
-                }
-              }}
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept=".pdf,.pptx"
-                multiple
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length) {
-                    handleFiles(e.target.files);
-                  }
-                }}
-              />
-              <div className="dropzone-icon-box">
-                <UploadCloud size={36} />
-              </div>
-              <h3 className="dropzone-heading">Select multiple files or drop folder</h3>
-              <p className="dropzone-subtext">Add as many .pptx and .pdf files as you want to the batch queue</p>
-
-              <div className="supported-badges">
-                <span className="format-pill pdf">.PDF</span>
-                <span className="format-pill pptx">.PPTX</span>
-                <span className="format-pill">Batch Queue</span>
-              </div>
-            </div>
-
-            {/* Batch List */}
-            {batchItems.length > 0 && (
-              <div style={{ marginTop: "24px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-muted)" }}>
-                    Queue ({batchItems.length} documents)
-                  </span>
-                  <button
-                    className="btn-secondary"
-                    onClick={processBatchQueue}
-                    disabled={isBatchProcessing}
-                    style={{ padding: "8px 18px", fontSize: "13px" }}
-                  >
-                    {isBatchProcessing ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        <span>Processing Queue...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Play size={16} />
-                        <span>Process All Files</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  {batchItems.map((item) => (
-                    <div key={item.id} className="file-preview-card" style={{ marginTop: 0 }}>
-                      <div className="file-info-group">
-                        <div className={`file-type-icon ${item.ext}`}>
-                          {item.ext.toUpperCase()}
-                        </div>
-                        <div className="file-details">
-                          <span className="file-name">{item.file.name}</span>
-                          <span className="file-meta-text">{formatBytes(item.file.size)}</span>
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        {item.status === "ready" && (
-                          <span className="format-pill">Ready</span>
-                        )}
-                        {item.status === "processing" && (
-                          <span className="format-pill" style={{ color: "#38bdf8", borderColor: "rgba(56,189,248,0.3)" }}>
-                            Processing...
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {batchItems.map((item, idx) => (
+                      <div
+                        key={item.id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "12px 16px",
+                          border: "1px solid var(--border)",
+                          background: "#000",
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "13px",
+                        }}
+                      >
+                        <div>
+                          <span style={{ color: "var(--lab)", marginRight: "12px" }}>[{idx + 1}]</span>
+                          <span style={{ color: "#fff" }}>{item.file.name}</span>
+                          <span style={{ color: "var(--lab)", marginLeft: "12px", fontSize: "11px" }}>
+                            {formatBytes(item.file.size)}
                           </span>
-                        )}
-                        {item.status === "done" && item.result?.download_url && (
-                          <a
-                            href={item.result.download_url}
-                            download={`clean_${item.file.name}`}
-                            className="format-pill"
-                            style={{ color: "#34d399", borderColor: "rgba(52,211,153,0.3)", textDecoration: "none" }}
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                          {item.status === "ready" && <span className="badge-tag">READY</span>}
+                          {item.status === "processing" && <span className="badge-tag red">PURGING...</span>}
+                          {item.status === "done" && item.result?.download_url && (
+                            <a
+                              href={item.result.download_url}
+                              download={`clean_${item.file.name}`}
+                              style={{ color: "var(--red)", textDecoration: "none", fontWeight: 600 }}
+                            >
+                              [ DOWNLOAD ]
+                            </a>
+                          )}
+                          {item.status === "error" && <span style={{ color: "var(--red)" }}>FAILED</span>}
+                          <button
+                            onClick={() => setBatchItems(prev => prev.filter(b => b.id !== item.id))}
+                            style={{ background: "none", border: "none", color: "var(--lab)", cursor: "pointer" }}
                           >
-                            Download Clean
-                          </a>
-                        )}
-                        {item.status === "error" && (
-                          <span className="format-pill" style={{ color: "#f87171", borderColor: "rgba(248,113,113,0.3)" }}>
-                            Failed
-                          </span>
-                        )}
-
-                        <button
-                          className="btn-icon"
-                          onClick={() => removeBatchItem(item.id)}
-                          disabled={isBatchProcessing}
-                          title="Remove file"
-                        >
-                          <X size={16} />
-                        </button>
+                            &times;
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* Feature Highlights Grid */}
-      <section className="features-grid-3">
-        <div className="feature-box">
-          <div className="feature-icon-wrapper">
-            <Layers size={22} />
-          </div>
-          <h3 className="feature-title">Smart Master Detection</h3>
-          <p className="feature-desc">
-            Intelligently traverses PowerPoint Slide Masters, Layouts, and PDF bounding boxes to isolate Gamma hyperlinks without touching user content.
-          </p>
+              )}
+            </div>
+          )}
         </div>
-
-        <div className="feature-box">
-          <div className="feature-icon-wrapper">
-            <Cpu size={22} />
-          </div>
-          <h3 className="feature-title">Lossless Vector Preservation</h3>
-          <p className="feature-desc">
-            Retains crisp vector shapes, embedded fonts, animations, and high-resolution slides. Zero rasterization or quality degradation.
-          </p>
-        </div>
-
-        <div className="feature-box">
-          <div className="feature-icon-wrapper">
-            <ShieldCheck size={22} />
-          </div>
-          <h3 className="feature-title">In-Memory Privacy</h3>
-          <p className="feature-desc">
-            Files are processed entirely within ephemeral memory. Automated background cleanup sweeps and destroys all temporary files post-export.
-          </p>
-        </div>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 }

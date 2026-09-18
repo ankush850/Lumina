@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumina — Security built into every system layer</title>
+
+<!-- Fonts: Space Grotesk ('SG') and JetBrains Mono ('JB') with font-display: block -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;480;500;600&family=Space+Grotesk:wght@400;480;700&display=block" rel="stylesheet">
+
+<style>
+/* Font family aliases */
+@font-face {
+  font-family: 'SG';
+  src: local('Space Grotesk'), local('SpaceGrotesk-Regular'),
+       url('https://fonts.gstatic.com/s/spacegrotesk/v16/V8mDoQDjQSkFtoMM3T5rPz3CSit5.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'JB';
+  src: local('JetBrains Mono'), local('JetBrainsMono-Regular'),
+       url('https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_auzYZW6G4.woff2') format('woff2');
+  font-weight: 400 500;
+  font-display: block;
+}
+
+/* Base resets & tokens */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 0 !important; /* Non-negotiable: No rounded pills / sharp edges only */
+}
+
+:root {
+  /* Desktop (default 1505x700) */
+  --s: min(100vw / 1505, 100vh / 700);
+  --red: #c81b1c;
+  --ink: #fff;
+  --sub: #e6e6e6;
+  --lab: #949494;
+  --bx: 60;
+  --by: 36;
+  --bs: 44;   /* burger box */
+  --h1y: -12.5;
+  --suby: 167.5;
+  --numy: 19;
+  --laby: 74;
+}
+
+/* Tablet portrait 900x1200 */
+@media (max-width: 1023px) and (max-aspect-ratio: 1/1) {
+  :root {
+    --s: clamp(0.82px, min(100vw / 900, 100vh / 1200), 1.25px);
+    --bx: 56;
+    --by: 33;
+    --bs: 40;
+    --h1y: -10.25;
+    --suby: 137.4;
+    --numy: 15.6;
+    --laby: 60.7;
+  }
+}
+
+/* Phone 430x620 */
+@media (max-width: 599px) {
+  :root {
+    --s: min(100vw / 430, 100vh / 620, 1.02px);
+    --bx: 26;
+    --by: 21;
+    --bs: 34;
+    --h1y: -7.1;
+    --suby: 108;
+    --numy: 13;
+    --laby: 50;
+  }
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  color: var(--ink);
+  font-family: 'JB', 'JetBrains Mono', monospace;
+}
+
+/* SVG defs container */
+.svgdefs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Screen Stage */
+.screen {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Background video layers */
+.bg, .bg2 {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg {
+  filter: url(#grade);
+}
+
+.bg video, .bg2 video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.bg2 {
+  filter: url(#grade2);
+  mix-blend-mode: plus-lighter;
+  opacity: .35;
+  -webkit-mask-image: linear-gradient(180deg, transparent 21.5%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 21.5%, #000 100%);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+
+/* Tablet portrait adjustments */
+@media (max-width: 1023px) and (max-aspect-ratio: 1/1) {
+  .bg2 {
+    display: none;
+  }
+  .bg video {
+    object-position: right top;
+    transform: scale(1.18);
+    transform-origin: right top;
+  }
+  .bg {
+    -webkit-mask-image: linear-gradient(180deg, #000 0 40%, transparent 64%);
+    mask-image: linear-gradient(180deg, #000 0 40%, transparent 64%);
+  }
+  .scrim {
+    display: block;
+    background: linear-gradient(100deg, #000 26%, rgba(0,0,0,.74) 50%, rgba(0,0,0,.18) 76%, transparent 92%);
+  }
+}
+
+/* Phone adjustments */
+@media (max-width: 599px) {
+  .bg video, .bg2 video {
+    object-position: 78% top;
+  }
+  .bg2 {
+    display: block;
+    -webkit-mask-image: linear-gradient(180deg, transparent 10%, #000 60%);
+    mask-image: linear-gradient(180deg, transparent 10%, #000 60%);
+  }
+  .scrim {
+    display: block;
+    background: linear-gradient(180deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,.50) 24%, rgba(0,0,0,.86) 42%, #000 66%);
+  }
+}
+
+/* Main Frame */
+.frame {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.frame > * {
+  pointer-events: auto;
+}
+
+/* Header */
+header {
+  position: relative;
+  width: 100%;
+  height: calc(58 * var(--s));
+  margin-top: calc(30 * var(--s));
+}
+
+/* Logo */
+.logo-link {
+  position: absolute;
+  left: calc(60 * var(--s));
+  top: calc(5 * var(--s));
+  display: flex;
+  align-items: center;
+  gap: calc(14 * var(--s));
+  text-decoration: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.logo-svg {
+  width: calc(45 * var(--s));
+  height: calc(45 * var(--s));
+  display: block;
+}
+
+.brand-text {
+  font-family: 'SG', 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: calc(22 * var(--s));
+  letter-spacing: calc(1.5 * var(--s));
+  color: var(--ink);
+}
+
+/* Nav */
+nav {
+  position: absolute;
+  left: calc(482 * var(--s));
+  top: calc(2 * var(--s));
+  height: calc(58 * var(--s));
+  display: flex;
+  align-items: center;
+}
+
+.nav-item {
+  font-family: 'JB', 'JetBrains Mono', monospace;
+  font-weight: 400;
+  font-size: calc(19.9 * var(--s));
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8 * var(--s));
+  margin-right: calc(40 * var(--s));
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-item:nth-child(2) {
+  margin-left: calc(13 * var(--s)); /* 40 + 13 = 53 margin-left relative to gap */
+}
+
+.nav-item:nth-child(4) {
+  margin-left: calc(-3 * var(--s)); /* 40 - 3 = 37 */
+  margin-right: 0;
+}
+
+.nav-chevron {
+  width: calc(11.6 * var(--s));
+  height: calc(7.2 * var(--s));
+  margin-top: calc(-2.6 * var(--s));
+  stroke: currentColor;
+  stroke-width: 1.7;
+  fill: none;
+}
+
+/* Top Button */
+.btn-top {
+  position: absolute;
+  left: calc(1232 * var(--s));
+  top: 0;
+}
+
+/* General Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: calc(212 * var(--s));
+  height: calc(58 * var(--s));
+  background: var(--red);
+  color: #fff;
+  text-decoration: none;
+  padding-left: calc(18 * var(--s));
+  padding-right: calc(22 * var(--s));
+  gap: calc(11 * var(--s));
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-label {
+  font-family: 'SG', 'Space Grotesk', sans-serif;
+  font-weight: 480;
+  font-size: calc(20.85 * var(--s));
+  letter-spacing: calc(-0.62 * var(--s));
+  transform: translateY(calc(1.5 * var(--s)));
+  white-space: nowrap;
+  flex: 1;
+}
+
+.btn-arrow {
+  width: calc(21.5 * var(--s));
+  height: calc(18 * var(--s));
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+@media (hover: hover) {
+  .nav-item:hover {
+    color: var(--red);
+  }
+  .btn:hover {
+    background: #b01617;
+  }
+  .btn:hover .btn-arrow {
+    transform: translateX(calc(3 * var(--s)));
+  }
+}
+
+.btn:focus-visible, .nav-item:focus-visible, .burger:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* Burger Button */
+.burger {
+  display: none;
+  position: absolute;
+  right: calc(var(--bx) * var(--s));
+  top: calc(var(--by) * var(--s));
+  width: calc(var(--bs) * var(--s));
+  height: calc(var(--bs) * var(--s));
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: calc(6 * var(--s));
+  z-index: 120;
+}
+
+.burger-bar {
+  display: block;
+  height: calc(2.2 * var(--s));
+  background: #fff;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.2s ease, width 0.3s ease;
+}
+
+.burger-bar:nth-child(1) {
+  width: 100%;
+}
+.burger-bar:nth-child(2) {
+  width: 100%;
+}
+.burger-bar:nth-child(3) {
+  width: 47%;
+}
+
+/* Burger Open State */
+body.nav-open .burger-bar:nth-child(1) {
+  transform: translateY(calc(8.2 * var(--s))) rotate(45deg);
+}
+body.nav-open .burger-bar:nth-child(2) {
+  opacity: 0;
+}
+body.nav-open .burger-bar:nth-child(3) {
+  width: 100%;
+  transform: translateY(calc(-8.2 * var(--s))) rotate(-45deg);
+}
+
+/* Tablet / Phone Breakpoint: Hide desktop nav/btn-top, show burger */
+@media (max-width: 1023px) {
+  nav, .btn-top {
+    display: none;
+  }
+  .burger {
+    display: flex;
+  }
+  .btn {
+    width: calc(174 * var(--s));
+    height: calc(47.6 * var(--s));
+    padding-left: calc(14.8 * var(--s));
+    padding-right: calc(18 * var(--s));
+    gap: calc(9 * var(--s));
+  }
+  .btn-label {
+    font-size: calc(17.1 * var(--s));
+  }
+}
+
+@media (max-width: 599px) {
+  .btn {
+    width: calc(185 * var(--s));
+    height: calc(50 * var(--s));
+    padding-left: calc(15.7 * var(--s));
+    padding-right: calc(19.1 * var(--s));
+    gap: calc(9.6 * var(--s));
+  }
+  .btn-label {
+    font-size: calc(17.5 * var(--s));
+  }
+}
+
+/* Fluid Spacers */
+.sp {
+  width: 100%;
+}
+.sp-a { flex: 239; }
+.sp-b { flex: 194; }
+.sp-c { flex: 115; }
+
+@media (max-width: 1023px) and (max-aspect-ratio: 1/1) {
+  .sp-a { flex: 340; }
+  .sp-b { flex: 276; }
+  .sp-c { flex: 163; }
+}
+
+@media (max-width: 599px) {
+  .sp-a { flex: 106; }
+  .sp-b { flex: 92; }
+  .sp-c { flex: 56; }
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  width: 100%;
+}
+
+.hero h1 {
+  font-family: 'SG', 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: calc(68.7 * var(--s));
+  line-height: calc(76 * var(--s));
+  letter-spacing: calc(-2.4 * var(--s));
+  color: var(--ink);
+  position: absolute;
+  left: calc(73 * var(--s));
+  top: calc(var(--h1y) * var(--s));
+}
+
+.hero h1 .ln {
+  display: block;
+  overflow: hidden;
+  padding-bottom: calc(6 * var(--s));
+  margin-bottom: calc(-6 * var(--s));
+}
+
+.hero h1 .ln > span {
+  display: block;
+}
+
+.hero .sub {
+  font-family: 'JB', 'JetBrains Mono', monospace;
+  font-weight: 400;
+  font-size: calc(18.7 * var(--s));
+  line-height: calc(26 * var(--s));
+  letter-spacing: calc(-0.87 * var(--s));
+  color: var(--sub);
+  position: absolute;
+  left: calc(73 * var(--s));
+  top: calc(var(--suby) * var(--s));
+  white-space: pre-line;
+}
+
+.btn-cta {
+  position: absolute;
+  left: calc(73 * var(--s));
+  top: calc(248 * var(--s));
+}
+
+/* Stats Section */
+.stats {
+  position: relative;
+  width: 100%;
+  height: calc(105 * var(--s));
+}
+
+.stat-item {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-item.s1 { left: calc(70.4 * var(--s)); }
+.stat-item.s2 { left: calc(213.1 * var(--s)); }
+.stat-item.s3 { left: calc(392.6 * var(--s)); }
+
+.s-num {
+  font-family: 'JB', 'JetBrains Mono', monospace;
+  font-weight: 480;
+  font-size: calc(33.45 * var(--s));
+  line-height: 1;
+  color: var(--ink);
+  position: absolute;
+  top: calc(var(--numy) * var(--s));
+}
+
+.stat-item.s3 .s-num {
+  margin-left: calc(-4.4 * var(--s));
+}
+
+.s-lab {
+  font-family: 'SG', 'Space Grotesk', sans-serif;
+  font-weight: 400;
+  font-size: calc(21.9 * var(--s));
+  line-height: 1;
+  letter-spacing: calc(-0.62 * var(--s));
+  color: var(--lab);
+  position: absolute;
+  top: calc(var(--laby) * var(--s));
+}
+
+/* Vertical Rules */
+.stat-rule {
+  position: absolute;
+  width: calc(1.5 * var(--s));
+  top: calc(15 * var(--s));
+  height: calc(82 * var(--s));
+  background: linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.21) 50%, rgba(255,255,255,.085));
+}
+
+.stat-rule.r1 { left: calc(181 * var(--s)); }
+.stat-rule.r2 { left: calc(356 * var(--s)); }
+
+/* Mobile Menu Overlay (#menu) */
+.menu {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 110;
+  display: none;
+  flex-direction: column;
+  padding: calc(85 * var(--s)) calc(28 * var(--s)) calc(36 * var(--s));
+  overflow-y: auto;
+}
+
+body.nav-open .menu {
+  display: flex;
+}
+
+.menu-tex {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .4;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 100%);
+}
+
+.menu-tex video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.menu-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) 0.04s;
+}
+
+body.nav-open .menu-rule {
+  transform: scaleX(1);
+}
+
+.menu-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.menu-eyebrow {
+  font-family: 'JB', 'JetBrains Mono', monospace;
+  font-size: calc(11.5 * var(--s));
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lab);
+  margin-bottom: calc(24 * var(--s));
+}
+
+.menu-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(18 * var(--s));
+}
+
+.menu-item {
+  opacity: 0;
+  transform: translateY(calc(12 * var(--s)));
+  transition: opacity 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+body.nav-open .menu-item:nth-child(1) { transition-delay: 0.08s; opacity: 1; transform: translateY(0); }
+body.nav-open .menu-item:nth-child(2) { transition-delay: 0.14s; opacity: 1; transform: translateY(0); }
+body.nav-open .menu-item:nth-child(3) { transition-delay: 0.20s; opacity: 1; transform: translateY(0); }
+body.nav-open .menu-item:nth-child(4) { transition-delay: 0.26s; opacity: 1; transform: translateY(0); }
+
+.mrow {
+  font-family: 'SG', 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: calc(30 * var(--s));
+  color: var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: calc(6 * var(--s)) 0;
+}
+
+.m-chevron {
+  width: calc(14 * var(--s));
+  height: calc(9 * var(--s));
+  stroke: var(--lab);
+  stroke-width: 2;
+  fill: none;
+  transition: transform 0.25s ease;
+}
+
+.accordion-panel {
+  display: none;
+  flex-direction: column;
+  gap: calc(12 * var(--s));
+  padding-left: calc(14 * var(--s));
+  padding-top: calc(10 * var(--s));
+  border-left: 1px solid rgba(255,255,255,0.15);
+  margin-top: calc(6 * var(--s));
+}
+
+.accordion-panel.open {
+  display: flex;
+}
+
+.accordion-open .m-chevron {
+  transform: rotate(180deg);
+}
+
+.sublink {
+  font-family: 'JB', 'JetBrains Mono', monospace;
+  font-weight: 400;
+  font-size: calc(14 * var(--s));
+  color: var(--sub);
+  text-decoration: none;
+}
+
+.menu-footer {
+  margin-top: auto;
+  padding-top: calc(28 * var(--s));
+  display: flex;
+  flex-direction: column;
+  gap: calc(14 * var(--s));
+}
+
+.btn-menu {
+  width: 100%;
+  justify-content: center;
+}
+
+.menu-note {
+  font-family: 'JB', 'JetBrains Mono', monospace;
+  font-size: calc(12 * var(--s));
+  color: var(--lab);
+  text-align: center;
+}
+
+/* Entrance Choreography Initial State (html.intro) */
+html.intro .logo-link {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+html.intro .nav-item {
+  opacity: 0;
+  transform: translateY(calc(7 * var(--s)));
+}
+
+html.intro .burger {
+  opacity: 0;
+}
+
+html.intro .btn-top,
+html.intro .btn-cta {
+  clip-path: inset(0 100% 0 0);
+}
+
+html.intro .hero h1 .ln > span {
+  transform: translateY(120%);
+}
+
+html.intro .hero .sub {
+  opacity: 0;
+  transform: translateY(calc(14 * var(--s)));
+}
+
+html.intro .stat-rule {
+  transform: scaleY(0);
+  transform-origin: center;
+}
+
+html.intro .s-num {
+  opacity: 0;
+  transform: translateY(calc(12 * var(--s)));
+}
+
+html.intro .s-lab {
+  opacity: 0;
+  transform: translateY(calc(10 * var(--s)));
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+  html.intro .logo-link,
+  html.intro .nav-item,
+  html.intro .burger,
+  html.intro .hero .sub,
+  html.intro .s-num,
+  html.intro .s-lab {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  html.intro .btn-top,
+  html.intro .btn-cta {
+    clip-path: none !important;
+  }
+  html.intro .hero h1 .ln > span {
+    transform: none !important;
+  }
+  html.intro .stat-rule {
+    transform: scaleY(1) !important;
+  }
+}
+</style>
+
+<!-- Arm before paint: add .intro immediately so the finished page never flashes -->
+<script>
+(function() {
+  if (window.matchMedia && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'animate' in document.documentElement) {
+    document.documentElement.classList.add('intro');
+  }
+})();
+</script>
+</head>
+
+<body>
+  <!-- Probe element to compute --s in JavaScript -->
+  <div id="probe" style="position:absolute;visibility:hidden;width:calc(100 * var(--s));pointer-events:none;"></div>
+
+  <!-- SVG LUT Color-Grade Filters -->
+  <svg class="svgdefs" aria-hidden="true">
+    <defs>
+      <filter id="grade" color-interpolation-filters="sRGB">
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0.0018 0.0105 0.0154 0.0228 0.0307 0.0404 0.0485 0.0585 0.0719 0.0923 0.1205 0.1466 0.1657 0.1866 0.2197 0.2405 0.2485 0.2921 0.3362 0.3465 0.3472 0.3781 0.3781 0.4078 0.4199 0.4391 0.4604 0.4763 0.4798 0.5197 0.5473 0.5720 0.5995 0.6048 0.6232 0.6322 0.6483 0.6734 0.7201 0.7201 0.7410 0.7707 0.7707 0.7790 0.8084 0.8084 0.8390 0.8595 0.8707 0.8870 0.8993 0.9085 0.9132 0.9132 0.9162 0.9162 0.9162 0.9162 0.9162 0.9162 0.9162 0.9162 0.9162 0.9238 0.9300"/>
+          <feFuncG type="table" tableValues="0.0023 0.0106 0.0159 0.0250 0.0333 0.0445 0.0535 0.0620 0.0707 0.0827 0.0936 0.1063 0.1214 0.1402 0.1678 0.1727 0.2029 0.2176 0.2461 0.2757 0.2814 0.3050 0.3415 0.3692 0.3826 0.3884 0.4617 0.4617 0.4617 0.4643 0.4643 0.4808 0.5706 0.6005 0.6005 0.6390 0.6390 0.6390 0.6390 0.6390 0.6390 0.6390 0.6390 0.6390 0.6524 0.6664 0.6805 0.6945 0.7086 0.7227 0.7367 0.7508 0.7648 0.7789 0.7929 0.8070 0.8211 0.8351 0.8492 0.8632 0.8773 0.8913 0.9054 0.9195 0.9300"/>
+          <feFuncB type="table" tableValues="0.0021 0.0110 0.0187 0.0311 0.0377 0.0466 0.0584 0.0706 0.0791 0.0924 0.1039 0.1145 0.1316 0.1464 0.1614 0.1719 0.1887 0.2014 0.2247 0.2458 0.2954 0.2954 0.3089 0.3938 0.3938 0.3988 0.3988 0.4581 0.4581 0.4762 0.4762 0.4763 0.5374 0.5560 0.5813 0.5813 0.5813 0.5813 0.5835 0.5969 0.6104 0.6238 0.6373 0.6507 0.6642 0.6777 0.6911 0.7046 0.7181 0.7315 0.7449 0.7584 0.7719 0.7853 0.7988 0.8123 0.8257 0.8391 0.8526 0.8661 0.8795 0.8930 0.9065 0.9199 0.9300"/>
+        </feComponentTransfer>
+      </filter>
+
+      <filter id="grade2" color-interpolation-filters="sRGB">
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0.0016 0.0092 0.0136 0.0201 0.0270 0.0356 0.0427 0.0515 0.0633 0.0812 0.1060 0.1290 0.1458 0.1642 0.1933 0.2116 0.2187 0.2570 0.2959 0.3049 0.3055 0.3327 0.3327 0.3589 0.3695 0.3864 0.4052 0.4191 0.4222 0.4573 0.4816 0.5034 0.5276 0.5322 0.5484 0.5563 0.5705 0.5926 0.6337 0.6337 0.6521 0.6782 0.6782 0.6855 0.7114 0.7114 0.7383 0.7564 0.7662 0.7806 0.7914 0.7995 0.8036 0.8036 0.8063 0.8063 0.8063 0.8063 0.8063 0.8063 0.8063 0.8063 0.8063 0.8129 0.8184"/>
+          <feFuncG type="table" tableValues="0.0015 0.0069 0.0103 0.0163 0.0216 0.0289 0.0348 0.0403 0.0460 0.0538 0.0608 0.0691 0.0789 0.0911 0.1091 0.1123 0.1319 0.1414 0.1600 0.1792 0.1829 0.1983 0.2220 0.2400 0.2487 0.2525 0.3001 0.3001 0.3001 0.3018 0.3018 0.3125 0.3709 0.3903 0.3903 0.4153 0.4153 0.4153 0.4153 0.4153 0.4153 0.4153 0.4153 0.4153 0.4241 0.4332 0.4423 0.4514 0.4606 0.4698 0.4789 0.4880 0.4971 0.5063 0.5154 0.5246 0.5337 0.5428 0.5520 0.5611 0.5702 0.5793 0.5885 0.5977 0.6045"/>
+          <feFuncB type="table" tableValues="0.0013 0.0066 0.0112 0.0187 0.0226 0.0280 0.0350 0.0424 0.0475 0.0554 0.0623 0.0687 0.0790 0.0878 0.0968 0.1031 0.1132 0.1208 0.1348 0.1475 0.1772 0.1772 0.1853 0.2363 0.2363 0.2393 0.2393 0.2749 0.2749 0.2857 0.2857 0.2858 0.3224 0.3336 0.3488 0.3488 0.3488 0.3488 0.3501 0.3581 0.3662 0.3743 0.3824 0.3904 0.3985 0.4066 0.4147 0.4228 0.4309 0.4389 0.4469 0.4550 0.4631 0.4712 0.4793 0.4874 0.4954 0.5035 0.5116 0.5197 0.5277 0.5358 0.5439 0.5519 0.5580"/>
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+
+  <div class="screen">
+    <!-- Background Video Instances -->
+    <div class="bg">
+      <video autoplay muted loop playsinline preload="auto">
+        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_132544_b6ef0174-ed95-45ad-9a2f-ccb8acfbdce8.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="bg2">
+      <video autoplay muted loop playsinline preload="auto">
+        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_132544_b6ef0174-ed95-45ad-9a2f-ccb8acfbdce8.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <!-- Scrim (activated on tablet/mobile) -->
+    <div class="scrim"></div>
+
+    <!-- Main Content Frame -->
+    <div class="frame">
+      <header>
+        <!-- Logo: 46x46 SVG 4 chevron arrows pointing inward -->
+        <a href="/" class="logo-link" aria-label="Lumina Home">
+          <svg class="logo-svg" viewBox="0 0 46 46" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="butt" stroke-linejoin="miter">
+            <!-- North arm (rot 0) -->
+            <g transform="rotate(0 23 23)">
+              <path d="M23 0V19.5" />
+              <path d="M14 10.2L23 19.2L32 10.2" />
+            </g>
+            <!-- East arm (rot 90) -->
+            <g transform="rotate(90 23 23)">
+              <path d="M23 0V19.5" />
+              <path d="M14 10.2L23 19.2L32 10.2" />
+            </g>
+            <!-- South arm (rot 180) -->
+            <g transform="rotate(180 23 23)">
+              <path d="M23 0V19.5" />
+              <path d="M14 10.2L23 19.2L32 10.2" />
+            </g>
+            <!-- West arm (rot 270) -->
+            <g transform="rotate(270 23 23)">
+              <path d="M23 0V19.5" />
+              <path d="M14 10.2L23 19.2L32 10.2" />
+            </g>
+          </svg>
+          <span class="brand-text">LUMINA</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav>
+          <a href="/" class="nav-item">Home</a>
+          <a href="#resources" class="nav-item">
+            <span>Resources</span>
+            <svg class="nav-chevron" viewBox="0 0 11 6">
+              <path d="M1 1L5.5 5L10 1" />
+            </svg>
+          </a>
+          <a href="#benefits" class="nav-item">
+            <span>Benefits</span>
+            <svg class="nav-chevron" viewBox="0 0 11 6">
+              <path d="M1 1L5.5 5L10 1" />
+            </svg>
+          </a>
+          <a href="#contact" class="nav-item">Contact</a>
+        </nav>
+
+        <!-- Top Button -->
+        <a href="/studio" class="btn btn-top">
+          <span class="btn-label">Secure system</span>
+          <svg class="btn-arrow" viewBox="0 0 22 18">
+            <path d="M0 9H20.1" />
+            <path d="M12.1 1L20.1 9L12.1 17" />
+          </svg>
+        </a>
+
+        <!-- Mobile Burger Trigger -->
+        <button class="burger" id="burger-btn" aria-label="Open menu" aria-expanded="false">
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+        </button>
+      </header>
+
+      <!-- Spacer A -->
+      <div class="sp sp-a"></div>
+
+      <!-- Hero Section -->
+      <section class="hero">
+        <h1>
+          <span class="ln"><span>Security built into</span></span>
+          <span class="ln"><span>every system layer</span></span>
+        </h1>
+
+        <p class="sub">Engineered to stay resilient, controlled,
+and uncompromised under pressure.</p>
+
+        <a href="/studio" class="btn btn-cta">
+          <span class="btn-label">Secure system</span>
+          <svg class="btn-arrow" viewBox="0 0 22 18">
+            <path d="M0 9H20.1" />
+            <path d="M12.1 1L20.1 9L12.1 17" />
+          </svg>
+        </a>
+      </section>
+
+      <!-- Spacer B -->
+      <div class="sp sp-b"></div>
+
+      <!-- Stats Section -->
+      <section class="stats">
+        <div class="stat-item s1">
+          <span class="s-num">300+</span>
+          <span class="s-lab">Clients</span>
+        </div>
+
+        <div class="stat-rule r1"></div>
+
+        <div class="stat-item s2">
+          <span class="s-num">99%</span>
+          <span class="s-lab">Satisfaction</span>
+        </div>
+
+        <div class="stat-rule r2"></div>
+
+        <div class="stat-item s3">
+          <span class="s-num">$5M+</span>
+          <span class="s-lab">Revenue</span>
+        </div>
+      </section>
+
+      <!-- Spacer C -->
+      <div class="sp sp-c"></div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="menu" id="menu" aria-hidden="true">
+      <div class="menu-tex">
+        <video autoplay muted loop playsinline preload="auto">
+          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_132544_b6ef0174-ed95-45ad-9a2f-ccb8acfbdce8.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <div class="menu-rule"></div>
+
+      <div class="menu-content">
+        <div class="menu-eyebrow">MENU</div>
+
+        <ul class="menu-list">
+          <li class="menu-item">
+            <a href="/" class="mrow">Home</a>
+          </li>
+
+          <li class="menu-item" id="item-resources">
+            <button class="mrow" type="button" aria-expanded="false" onclick="toggleAccordion('resources')">
+              <span>Resources</span>
+              <svg class="m-chevron" viewBox="0 0 14 9">
+                <path d="M1 1L7 7L13 1" />
+              </svg>
+            </button>
+            <div class="accordion-panel" id="panel-resources">
+              <a href="/docs" class="sublink">Documentation</a>
+              <a href="#threat-reports" class="sublink">Threat reports</a>
+              <a href="#changelog" class="sublink">Changelog</a>
+            </div>
+          </li>
+
+          <li class="menu-item" id="item-benefits">
+            <button class="mrow" type="button" aria-expanded="false" onclick="toggleAccordion('benefits')">
+              <span>Benefits</span>
+              <svg class="m-chevron" viewBox="0 0 14 9">
+                <path d="M1 1L7 7L13 1" />
+              </svg>
+            </button>
+            <div class="accordion-panel" id="panel-benefits">
+              <a href="#monitoring" class="sublink">Continuous monitoring</a>
+              <a href="#access-control" class="sublink">Access control</a>
+              <a href="#incident-response" class="sublink">Incident response</a>
+            </div>
+          </li>
+
+          <li class="menu-item">
+            <a href="#contact" class="mrow">Contact</a>
+          </li>
+        </ul>
+
+        <div class="menu-footer">
+          <a href="/studio" class="btn btn-menu">
+            <span class="btn-label">Secure system</span>
+            <svg class="btn-arrow" viewBox="0 0 22 18">
+              <path d="M0 9H20.1" />
+              <path d="M12.1 1L20.1 9L12.1 17" />
+            </svg>
+          </a>
+          <div class="menu-note">300+ clients &nbsp;/&nbsp; 99% satisfaction</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================================================
+   1. Video Synchronization Engine
+   ========================================================= */
+(function setupVideoSync() {
+  const v1 = document.querySelector('.bg video');
+  const v2 = document.querySelector('.bg2 video');
+  const v3 = document.querySelector('.menu-tex video');
+  const videos = [v1, v2, v3].filter(Boolean);
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    videos.forEach(v => {
+      v.removeAttribute('autoplay');
+      v.pause();
+    });
+    return;
+  }
+
+  if (v1) {
+    v1.addEventListener('timeupdate', () => {
+      const cur = v1.currentTime;
+      if (v2 && Math.abs(v2.currentTime - cur) > 0.12) v2.currentTime = cur;
+      if (v3 && Math.abs(v3.currentTime - cur) > 0.12) v3.currentTime = cur;
+    });
+  }
+})();
+
+/* =========================================================
+   2. Mobile Menu & Accordion Controller
+   ========================================================= */
+const burgerBtn = document.getElementById('burger-btn');
+const menuOverlay = document.getElementById('menu');
+
+function openMenu() {
+  document.body.classList.add('nav-open');
+  burgerBtn.setAttribute('aria-expanded', 'true');
+  burgerBtn.setAttribute('aria-label', 'Close menu');
+  menuOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeMenu() {
+  document.body.classList.remove('nav-open');
+  burgerBtn.setAttribute('aria-expanded', 'false');
+  burgerBtn.setAttribute('aria-label', 'Open menu');
+  menuOverlay.setAttribute('aria-hidden', 'true');
+}
+
+if (burgerBtn) {
+  burgerBtn.addEventListener('click', () => {
+    if (document.body.classList.contains('nav-open')) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+}
+
+// Single active accordion logic
+window.toggleAccordion = function(name) {
+  const panel = document.getElementById('panel-' + name);
+  const item = document.getElementById('item-' + name);
+  const isCurrentlyOpen = panel && panel.classList.contains('open');
+
+  // Close all
+  document.querySelectorAll('.accordion-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('accordion-open'));
+  document.querySelectorAll('.mrow[aria-expanded]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+
+  // Toggle target if it wasn't open
+  if (!isCurrentlyOpen && panel && item) {
+    panel.classList.add('open');
+    item.classList.add('accordion-open');
+    const btn = item.querySelector('.mrow');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  }
+};
+
+// Keyboard and Link Click Dismissals
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.body.classList.contains('nav-open')) {
+    closeMenu();
+  }
+});
+
+menuOverlay.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', closeMenu);
+});
+
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 1023 && document.body.classList.contains('nav-open')) {
+    closeMenu();
+  }
+});
+
+/* =========================================================
+   3. Entrance Animation (WAAPI Master Timeline)
+   ========================================================= */
+(function runEntranceAnimation() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.remove('intro');
+    return;
+  }
+
+  const easings = {
+    EXPO: 'cubic-bezier(0.16, 1, 0.3, 1)',
+    QUINT: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    QUART: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    TYPE: 'cubic-bezier(0.22, 0.85, 0.24, 1)'
+  };
+
+  const isPhone = window.innerWidth <= 599;
+  const scaleT = isPhone ? 0.86 : 1.0;
+
+  function dur(s) { return s * 1000 * scaleT; }
+  function del(s) { return s * 1000 * scaleT; }
+
+  // Measure --s via probe
+  const probe = document.getElementById('probe');
+  const s = (probe ? probe.getBoundingClientRect().width : 100) / 100;
+
+  // Query Animated Elements
+  const logo = document.querySelector('.logo-link');
+  const navItems = Array.from(document.querySelectorAll('.nav-item'));
+  const burger = document.querySelector('.burger');
+  const btnTop = document.querySelector('.btn-top');
+  const h1Spans = Array.from(document.querySelectorAll('.hero h1 .ln > span'));
+  const sub = document.querySelector('.hero .sub');
+  const btnCta = document.querySelector('.btn-cta');
+  const rules = Array.from(document.querySelectorAll('.stat-rule'));
+  const nums = Array.from(document.querySelectorAll('.s-num'));
+  const labs = Array.from(document.querySelectorAll('.s-lab'));
+
+  const animations = [];
+
+  function startChoreography() {
+    // 0.00: Logo opacity 0->1, scale 0.9->1, dur 0.70, EXPO
+    if (logo) {
+      animations.push(logo.animate([
+        { opacity: 0, transform: 'scale(0.9)' },
+        { opacity: 1, transform: 'scale(1)' }
+      ], { duration: dur(0.70), delay: del(0.00), easing: easings.EXPO, fill: 'forwards' }));
+    }
+
+    // 0.12: Nav links rise 7*s, dur 0.62, stagger 0.055, QUINT
+    navItems.forEach((el, i) => {
+      animations.push(el.animate([
+        { opacity: 0, transform: `translateY(${7 * s}px)` },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], { duration: dur(0.62), delay: del(0.12 + i * 0.055), easing: easings.QUINT, fill: 'forwards' }));
+    });
+
+    // 0.18: Burger fade, dur 0.55, QUART
+    if (burger) {
+      animations.push(burger.animate([
+        { opacity: 0 },
+        { opacity: 1 }
+      ], { duration: dur(0.55), delay: del(0.18), easing: easings.QUART, fill: 'forwards' }));
+    }
+
+    // 0.28: Top button wipe clip, dur 0.66, EXPO
+    if (btnTop) {
+      animations.push(btnTop.animate([
+        { clipPath: 'inset(0 100% 0 0)' },
+        { clipPath: 'inset(0 0% 0 0)' }
+      ], { duration: dur(0.66), delay: del(0.28), easing: easings.EXPO, fill: 'forwards' }));
+    }
+
+    // 0.34: Headline lines rise from 120%, dur 0.98, stagger 0.09, TYPE
+    h1Spans.forEach((el, i) => {
+      animations.push(el.animate([
+        { transform: 'translateY(120%)' },
+        { transform: 'translateY(0)' }
+      ], { duration: dur(0.98), delay: del(0.34 + i * 0.09), easing: easings.TYPE, fill: 'forwards' }));
+    });
+
+    // 0.74: Sub rise 14*s, dur 0.72, QUINT
+    if (sub) {
+      animations.push(sub.animate([
+        { opacity: 0, transform: `translateY(${14 * s}px)` },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], { duration: dur(0.72), delay: del(0.74), easing: easings.QUINT, fill: 'forwards' }));
+    }
+
+    // 0.90: Hero CTA wipe, dur 0.70, EXPO
+    if (btnCta) {
+      animations.push(btnCta.animate([
+        { clipPath: 'inset(0 100% 0 0)' },
+        { clipPath: 'inset(0 0% 0 0)' }
+      ], { duration: dur(0.70), delay: del(0.90), easing: easings.EXPO, fill: 'forwards' }));
+    }
+
+    // 0.98: Rules scaleY 0->1, dur 0.60, stagger 0.07, QUART
+    rules.forEach((el, i) => {
+      animations.push(el.animate([
+        { transform: 'scaleY(0)' },
+        { transform: 'scaleY(1)' }
+      ], { duration: dur(0.60), delay: del(0.98 + i * 0.07), easing: easings.QUART, fill: 'forwards' }));
+    });
+
+    // 1.04: Stat nums rise 12*s, dur 0.66, stagger 0.085, QUINT
+    nums.forEach((el, i) => {
+      animations.push(el.animate([
+        { opacity: 0, transform: `translateY(${12 * s}px)` },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], { duration: dur(0.66), delay: del(1.04 + i * 0.085), easing: easings.QUINT, fill: 'forwards' }));
+    });
+
+    // 1.10: Stat labs rise 10*s, dur 0.62, stagger 0.085, QUINT
+    labs.forEach((el, i) => {
+      animations.push(el.animate([
+        { opacity: 0, transform: `translateY(${10 * s}px)` },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], { duration: dur(0.62), delay: del(1.10 + i * 0.085), easing: easings.QUINT, fill: 'forwards' }));
+    });
+
+    // Cleanup: Remove intro class and cancel animations so no inline styles remain
+    const totalDuration = del(1.9);
+    setTimeout(teardown, totalDuration);
+  }
+
+  function teardown() {
+    document.documentElement.classList.remove('intro');
+    animations.forEach(a => {
+      try { a.cancel(); } catch(e) {}
+    });
+  }
+
+  // Hard deadline 4000ms
+  const hardDeadline = setTimeout(teardown, 4000);
+
+  // Wait for fonts, then start
+  if (document.fonts && document.fonts.ready) {
+    Promise.race([
+      document.fonts.ready,
+      new Promise(res => setTimeout(res, 1000))
+    ]).then(() => {
+      requestAnimationFrame(() => {
+        clearTimeout(hardDeadline);
+        startChoreography();
+        setTimeout(teardown, del(2.1));
+      });
+    });
+  } else {
+    setTimeout(() => {
+      clearTimeout(hardDeadline);
+      startChoreography();
+      setTimeout(teardown, del(2.1));
+    }, 200);
+  }
+})();
+</script>
+</body>
+</html>

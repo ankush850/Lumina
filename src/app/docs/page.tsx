@@ -1,159 +1,167 @@
 "use client";
 
-import { Terminal, Code2, Server, CheckCircle2, FileCode, Cpu, ShieldCheck } from "lucide-react";
-import CodeBlock from "@/components/CodeBlock";
+import { useState } from "react";
+import Link from "next/link";
 
 export default function DocsPage() {
-  const curlCode = `curl -X POST "http://localhost:3000/api/remove-watermark" \\
-  -F "file=@presentation.pptx"`;
+  const [activeTab, setActiveTab] = useState<"curl" | "python" | "js">("curl");
+  const [copied, setCopied] = useState(false);
 
-  const pythonCode = `import requests
+  const snippets = {
+    curl: `curl -X POST "http://localhost:3000/api/remove-watermark" \\
+  -F "file=@presentation.pptx"`,
+    python: `import requests
 
 url = "http://localhost:3000/api/remove-watermark"
-files = {"file": open("presentation.pptx", "rb")}
+with open("presentation.pptx", "rb") as f:
+    response = requests.post(url, files={"file": f})
 
-response = requests.post(url, files=files)
 result = response.json()
-
-print(f"Status: {result['status']}")
-print(f"Watermarks Removed: {result['watermarks_removed']}")
-print(f"Clean Download URL: {result['download_url']}")`;
-
-  const jsCode = `const formData = new FormData();
+print("Clean Document Download URL:", result.get("download_url"))`,
+    js: `const formData = new FormData();
 formData.append("file", fileInput.files[0]);
 
-const response = await fetch("http://localhost:3000/api/remove-watermark", {
+const response = await fetch("/api/remove-watermark", {
   method: "POST",
   body: formData,
 });
 
 const data = await response.json();
-console.log("Cleaned Document URL:", data.download_url);`;
+console.log("Download URL:", data.download_url);`,
+  };
 
-  const tabs = [
-    { label: "cURL", lang: "bash", code: curlCode },
-    { label: "Python", lang: "python", code: pythonCode },
-    { label: "JavaScript", lang: "javascript", code: jsCode },
-  ];
+  const copyCode = () => {
+    navigator.clipboard.writeText(snippets[activeTab]);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <main className="main-wrapper" style={{ maxWidth: "1050px" }}>
-      {/* Header */}
-      <section className="hero-header" style={{ marginBottom: "48px" }}>
-        <div className="hero-pill-badge">
-          <Terminal size={15} />
-          <span>Developer Specifications &amp; Engine Internals</span>
+    <div style={{ minHeight: "100vh", background: "#000", color: "#fff", position: "relative" }}>
+      {/* Navigation */}
+      <div className="brutalist-nav">
+        <Link href="/" className="logo-link" style={{ position: "static" }}>
+          <svg className="logo-svg" style={{ width: "32px", height: "32px" }} viewBox="0 0 46 46" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="butt" strokeLinejoin="miter">
+            <g transform="rotate(0 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+            <g transform="rotate(90 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+            <g transform="rotate(180 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+            <g transform="rotate(270 23 23)"><path d="M23 0V19.5" /><path d="M14 10.2L23 19.2L32 10.2" /></g>
+          </svg>
+          <span className="brand-text" style={{ fontSize: "18px" }}>LUMINA DOCS</span>
+        </Link>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <Link href="/" style={{ color: "var(--lab)", textDecoration: "none", fontSize: "14px" }}>
+            Home
+          </Link>
+          <Link href="/studio" style={{ color: "var(--lab)", textDecoration: "none", fontSize: "14px" }}>
+            Studio
+          </Link>
+          <span className="badge-tag red">API v2.5</span>
         </div>
-        <h1 className="hero-title">
-          Architecture &amp; <br />
-          <span className="gradient-title">Developer REST API</span>
-        </h1>
-        <p className="hero-subtitle">
-          Programmatic integration guidelines, OpenXML tree inspectors, and PyMuPDF vector stream pruning mechanics.
-        </p>
-      </section>
+      </div>
 
-      {/* Architecture Section */}
-      <section style={{ marginBottom: "56px" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "26px", fontWeight: 700, color: "#ffffff", marginBottom: "20px" }}>
-          Engine Mechanics &amp; AST Traversal
-        </h2>
+      <main className="subpage-container">
+        {/* Title */}
+        <div style={{ marginBottom: "36px" }}>
+          <div className="badge-tag" style={{ marginBottom: "12px" }}>
+            SYSTEM LAYER: ARCHITECTURE &amp; ENDPOINTS
+          </div>
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "40px", fontWeight: 700, letterSpacing: "-1px" }}>
+            Developer API &amp; Specifications
+          </h1>
+          <p style={{ color: "var(--sub)", fontSize: "16px", marginTop: "8px", maxWidth: "680px" }}>
+            Programmatic document sanitization pipeline. Purge Gamma watermarks in automated batch workflows.
+          </p>
+        </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
-          <div className="glass-card" style={{ padding: "28px" }}>
-            <div className="feature-icon-wrapper">
-              <FileCode size={22} />
-            </div>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff", marginBottom: "10px" }}>
-              PowerPoint (.pptx) OpenXML Pipeline
+        {/* Engine Breakdown */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px", marginBottom: "36px" }}>
+          <div className="brutalist-card">
+            <div className="badge-tag" style={{ marginBottom: "12px" }}>ENGINE 01: OPENXML PARSER</div>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+              PowerPoint (.pptx) Layout Scrubber
             </h3>
-            <p style={{ color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.6" }}>
-              Lumina unzips and traverses PowerPoint XML packages: Slide Masters (`ppt/slideMasters/`), Layouts (`ppt/slideLayouts/`), and individual slide relations (`ppt/slides/`). It isolates shape nodes carrying Gamma hyperlink IDs and unlinks them at the schema level without affecting adjacent shapes.
+            <p style={{ color: "var(--sub)", fontSize: "14px", lineHeight: "1.6" }}>
+              Lumina unzips PPTX packages, walks the XML tree across Slide Masters (`ppt/slideMasters/`), Layouts (`ppt/slideLayouts/`), and individual slide relations. It locates shape nodes bound to Gamma hyperlink relationships and cleanly unlinks them.
             </p>
           </div>
 
-          <div className="glass-card" style={{ padding: "28px" }}>
-            <div className="feature-icon-wrapper">
-              <Cpu size={22} />
-            </div>
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff", marginBottom: "10px" }}>
-              PDF PyMuPDF Vector Scrubber
+          <div className="brutalist-card">
+            <div className="badge-tag" style={{ marginBottom: "12px" }}>ENGINE 02: PYMUPDF VECTOR STREAM</div>
+            <h3 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, marginBottom: "10px" }}>
+              PDF Lossless Bounding-Box Pruner
             </h3>
-            <p style={{ color: "var(--text-muted)", fontSize: "14px", lineHeight: "1.6" }}>
-              For PDF documents, Lumina leverages PyMuPDF to parse page display lists and hyperlink annotations. It calculates exact bounding-box coordinates for corner watermarks, strips annotation actions, and writes a clean PDF stream without rasterizing the vector text or graphics.
+            <p style={{ color: "var(--sub)", fontSize: "14px", lineHeight: "1.6" }}>
+              For PDF documents, PyMuPDF parses display lists and URI annotation dictionaries. It isolates corner watermark footprints and deletes them from page content streams without rasterizing user text or embedded vector assets.
             </p>
           </div>
         </div>
-      </section>
 
-      {/* API Reference Section */}
-      <section style={{ marginBottom: "56px" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "26px", fontWeight: 700, color: "#ffffff", marginBottom: "20px" }}>
-          REST API Reference
-        </h2>
-
-        <div className="glass-card" style={{ padding: "32px" }}>
+        {/* REST API Reference */}
+        <div className="brutalist-card">
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontWeight: 700,
-                fontSize: "13px",
-                padding: "4px 10px",
-                borderRadius: "6px",
-                background: "rgba(16, 185, 129, 0.15)",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
-                color: "var(--accent-green)",
-              }}
-            >
+            <span style={{ padding: "4px 10px", background: "var(--red)", color: "#fff", fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 700 }}>
               POST
             </span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "16px", color: "var(--text-highlight)", fontWeight: 600 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "18px", fontWeight: 600 }}>
               /api/remove-watermark
             </span>
           </div>
 
-          <p style={{ color: "var(--text-muted)", fontSize: "14px", marginBottom: "20px" }}>
-            Upload a `.pdf` or `.pptx` presentation to remove Gamma watermarks. Returns processing statistics and a direct download URL for the clean document.
+          <p style={{ color: "var(--sub)", fontSize: "14px", marginBottom: "20px" }}>
+            Upload a `.pptx` or `.pdf` file via multipart form-data. Returns sanitization telemetry and download URI.
           </p>
 
-          <h4 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-main)", marginBottom: "12px" }}>
-            Request Parameters (Multipart Form Data)
-          </h4>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "10px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", gap: "2px" }}>
+              {(["curl", "python", "js"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    padding: "6px 16px",
+                    background: activeTab === tab ? "rgba(255,255,255,0.12)" : "transparent",
+                    color: activeTab === tab ? "#fff" : "var(--lab)",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
 
-          <div style={{ overflowX: "auto", marginBottom: "28px" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid var(--bg-card-border)", textAlign: "left", color: "var(--text-dim)" }}>
-                  <th style={{ padding: "10px 12px" }}>Field</th>
-                  <th style={{ padding: "10px 12px" }}>Type</th>
-                  <th style={{ padding: "10px 12px" }}>Required</th>
-                  <th style={{ padding: "10px 12px" }}>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)", color: "var(--primary-light)" }}>file</td>
-                  <td style={{ padding: "12px", color: "var(--text-muted)" }}>Binary File</td>
-                  <td style={{ padding: "12px", color: "var(--accent-green)" }}>Yes</td>
-                  <td style={{ padding: "12px", color: "var(--text-muted)" }}>PowerPoint (.pptx) or PDF (.pdf) file (Max 50MB)</td>
-                </tr>
-              </tbody>
-            </table>
+            <button
+              onClick={copyCode}
+              style={{
+                background: "none",
+                border: "1px solid var(--border)",
+                color: copied ? "var(--red)" : "var(--sub)",
+                padding: "6px 14px",
+                cursor: "pointer",
+                fontFamily: "var(--font-mono)",
+                fontSize: "12px",
+              }}
+            >
+              {copied ? "[ COPIED ]" : "[ COPY CODE ]"}
+            </button>
           </div>
 
-          <h4 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-main)", marginBottom: "12px" }}>
-            Example Request &amp; Client Snippets
-          </h4>
+          <div className="sharp-codebox" style={{ marginBottom: "24px" }}>
+            <pre style={{ margin: 0 }}>
+              <code>{snippets[activeTab]}</code>
+            </pre>
+          </div>
 
-          <CodeBlock tabs={tabs} />
-
-          <h4 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-main)", marginTop: "28px", marginBottom: "12px" }}>
-            JSON Response
-          </h4>
-
-          <div className="code-box" style={{ padding: "16px" }}>
-            <pre style={{ margin: 0, color: "#cbd5e1" }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--lab)", marginBottom: "8px" }}>
+            SAMPLE RESPONSE PAYLOAD:
+          </div>
+          <div className="sharp-codebox">
+            <pre style={{ margin: 0, color: "#9ca3af" }}>
 {`{
   "status": "success",
   "file_type": "pptx",
@@ -162,42 +170,14 @@ console.log("Cleaned Document URL:", data.download_url);`;
   "layouts_processed": 1,
   "watermarks_removed": 1,
   "has_watermark": true,
-  "processing_time": "0.14s",
+  "processing_time": "0.08s",
   "message": "Presentation processed successfully",
   "download_url": "/download/processed_presentation.pptx"
 }`}
             </pre>
           </div>
         </div>
-      </section>
-
-      {/* Specifications */}
-      <section style={{ marginBottom: "64px" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "26px", fontWeight: 700, color: "#ffffff", marginBottom: "20px" }}>
-          Limits &amp; Ephemeral Lifecycle
-        </h2>
-
-        <div className="glass-card" style={{ padding: "24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }}>
-            <div>
-              <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Max File Size</div>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-highlight)" }}>50 MB</div>
-            </div>
-            <div>
-              <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Retention Time</div>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--accent-green)" }}>60 Minutes (Auto-Purged)</div>
-            </div>
-            <div>
-              <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Supported Formats</div>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--primary-light)" }}>PPTX, PDF</div>
-            </div>
-            <div>
-              <div style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "4px" }}>Authentication</div>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--secondary-light)" }}>None (Open Studio)</div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 }
