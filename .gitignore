@@ -69,3 +69,15 @@ outputs/*
 .idea/
 *.swp
 *.swo
+
+# Node & Next.js
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env*.local
+next-env.d.ts
+
