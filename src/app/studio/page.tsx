@@ -220,6 +220,9 @@ export default function StudioPage() {
           <Link href="/docs" style={{ color: "var(--lab)", textDecoration: "none", fontSize: "14px" }}>
             Documentation
           </Link>
+          <Link href="/benefits" style={{ color: "var(--lab)", textDecoration: "none", fontSize: "14px" }}>
+            Benefits
+          </Link>
           <span className="badge-tag red">SYSTEM ONLINE</span>
         </div>
       </div>

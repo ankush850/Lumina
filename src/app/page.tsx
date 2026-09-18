@@ -268,7 +268,7 @@ export default function LandingPage() {
               <span>Resources</span>
               <svg className="nav-chevron" viewBox="0 0 11 6"><path d="M1 1L5.5 5L10 1" /></svg>
             </Link>
-            <a href="#benefits" className="nav-item">Benefits</a>
+            <Link href="/benefits" className="nav-item">Benefits</Link>
             <a href="https://github.com/ankush850/Lumina" target="_blank" rel="noopener noreferrer" className="nav-item">
               Contact
             </a>
@@ -371,7 +371,7 @@ export default function LandingPage() {
             </li>
 
             <li className="menu-item">
-              <a href="#benefits" className="mrow" onClick={closeMenu}>Benefits</a>
+              <Link href="/benefits" className="mrow" onClick={closeMenu}>Benefits</Link>
             </li>
 
             <li className="menu-item">

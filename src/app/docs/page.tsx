@@ -57,6 +57,9 @@ console.log("Download URL:", data.download_url);`,
           <Link href="/studio" style={{ color: "var(--lab)", textDecoration: "none", fontSize: "14px" }}>
             Studio
           </Link>
+          <Link href="/benefits" style={{ color: "var(--lab)", textDecoration: "none", fontSize: "14px" }}>
+            Benefits
+          </Link>
           <span className="badge-tag red">API v2.5</span>
         </div>
       </div>
