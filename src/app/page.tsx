@@ -57,9 +57,6 @@ export default function LandingPage() {
     const h1Spans = Array.from(document.querySelectorAll(".hero h1 .ln > span"));
     const sub = document.querySelector(".hero .sub");
     const btnCta = document.querySelector(".btn-cta");
-    const rules = Array.from(document.querySelectorAll(".stat-rule"));
-    const nums = Array.from(document.querySelectorAll(".s-num"));
-    const labs = Array.from(document.querySelectorAll(".s-lab"));
 
     const animations: Animation[] = [];
 
@@ -156,43 +153,7 @@ export default function LandingPage() {
         );
       }
 
-      rules.forEach((el, i) => {
-        animations.push(
-          el.animate(
-            [
-              { transform: "scaleY(0)" },
-              { transform: "scaleY(1)" },
-            ],
-            { duration: dur(0.6), delay: del(0.98 + i * 0.07), easing: easings.QUART, fill: "forwards" }
-          )
-        );
-      });
-
-      nums.forEach((el, i) => {
-        animations.push(
-          el.animate(
-            [
-              { opacity: 0, transform: `translateY(${12 * s}px)` },
-              { opacity: 1, transform: "translateY(0)" },
-            ],
-            { duration: dur(0.66), delay: del(1.04 + i * 0.085), easing: easings.QUINT, fill: "forwards" }
-          )
-        );
-      });
-
-      labs.forEach((el, i) => {
-        animations.push(
-          el.animate(
-            [
-              { opacity: 0, transform: `translateY(${10 * s}px)` },
-              { opacity: 1, transform: "translateY(0)" },
-            ],
-            { duration: dur(0.62), delay: del(1.1 + i * 0.085), easing: easings.QUINT, fill: "forwards" }
-          )
-        );
-      });
-
-      setTimeout(teardown, del(1.9));
+      setTimeout(teardown, del(1.7));
     };
 
     const timer = setTimeout(startChoreography, 60);
@@ -314,30 +275,6 @@ export default function LandingPage() {
         </section>
 
         <div className="sp sp-b" />
-
-        {/* Stats Section */}
-        <section className="stats">
-          <div className="stat-item s1">
-            <span className="s-num">300+</span>
-            <span className="s-lab">Clients</span>
-          </div>
-
-          <div className="stat-rule r1" />
-
-          <div className="stat-item s2">
-            <span className="s-num">99%</span>
-            <span className="s-lab">Satisfaction</span>
-          </div>
-
-          <div className="stat-rule r2" />
-
-          <div className="stat-item s3">
-            <span className="s-num">$5M+</span>
-            <span className="s-lab">Revenue</span>
-          </div>
-        </section>
-
-        <div className="sp sp-c" />
       </div>
 
       {/* Mobile Menu Overlay */}
@@ -389,7 +326,6 @@ export default function LandingPage() {
                 <path d="M12.1 1L20.1 9L12.1 17" />
               </svg>
             </Link>
-            <div className="menu-note">300+ clients &nbsp;/&nbsp; 99% satisfaction</div>
           </div>
         </div>
       </div>

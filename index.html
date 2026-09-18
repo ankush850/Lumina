@@ -433,18 +433,18 @@ body.nav-open .burger-bar:nth-child(3) {
   width: 100%;
 }
 .sp-a { flex: 239; min-height: calc(15 * var(--s)); }
-.sp-b { flex: 194; min-height: calc(25 * var(--s)); }
+.sp-b { flex: 414; min-height: calc(25 * var(--s)); }
 .sp-c { flex: 115; min-height: calc(15 * var(--s)); }
 
 @media (max-width: 1023px) and (max-aspect-ratio: 1/1) {
   .sp-a { flex: 340; }
-  .sp-b { flex: 276; }
+  .sp-b { flex: 524; }
   .sp-c { flex: 163; }
 }
 
 @media (max-width: 599px) {
   .sp-a { flex: 106; }
-  .sp-b { flex: 92; }
+  .sp-b { flex: 170; }
   .sp-c { flex: 56; }
 }
 
@@ -917,31 +917,6 @@ Engineered for lossless layout and vector retention.</p>
 
       <!-- Spacer B -->
       <div class="sp sp-b"></div>
-
-      <!-- Stats Section -->
-      <section class="stats">
-        <div class="stat-item s1">
-          <span class="s-num">300+</span>
-          <span class="s-lab">Clients</span>
-        </div>
-
-        <div class="stat-rule r1"></div>
-
-        <div class="stat-item s2">
-          <span class="s-num">99%</span>
-          <span class="s-lab">Satisfaction</span>
-        </div>
-
-        <div class="stat-rule r2"></div>
-
-        <div class="stat-item s3">
-          <span class="s-num">$5M+</span>
-          <span class="s-lab">Revenue</span>
-        </div>
-      </section>
-
-      <!-- Spacer C -->
-      <div class="sp sp-c"></div>
     </div>
 
     <!-- Mobile Menu Overlay -->
@@ -993,7 +968,6 @@ Engineered for lossless layout and vector retention.</p>
               <path d="M12.1 1L20.1 9L12.1 17" />
             </svg>
           </a>
-          <div class="menu-note">300+ clients &nbsp;/&nbsp; 99% satisfaction</div>
         </div>
       </div>
     </div>
@@ -1127,9 +1101,6 @@ window.addEventListener('resize', () => {
   const h1Spans = Array.from(document.querySelectorAll('.hero h1 .ln > span'));
   const sub = document.querySelector('.hero .sub');
   const btnCta = document.querySelector('.btn-cta');
-  const rules = Array.from(document.querySelectorAll('.stat-rule'));
-  const nums = Array.from(document.querySelectorAll('.s-num'));
-  const labs = Array.from(document.querySelectorAll('.s-lab'));
 
   const animations = [];
 
@@ -1190,32 +1161,8 @@ window.addEventListener('resize', () => {
       ], { duration: dur(0.70), delay: del(0.90), easing: easings.EXPO, fill: 'forwards' }));
     }
 
-    // 0.98: Rules scaleY 0->1, dur 0.60, stagger 0.07, QUART
-    rules.forEach((el, i) => {
-      animations.push(el.animate([
-        { transform: 'scaleY(0)' },
-        { transform: 'scaleY(1)' }
-      ], { duration: dur(0.60), delay: del(0.98 + i * 0.07), easing: easings.QUART, fill: 'forwards' }));
-    });
-
-    // 1.04: Stat nums rise 12*s, dur 0.66, stagger 0.085, QUINT
-    nums.forEach((el, i) => {
-      animations.push(el.animate([
-        { opacity: 0, transform: `translateY(${12 * s}px)` },
-        { opacity: 1, transform: 'translateY(0)' }
-      ], { duration: dur(0.66), delay: del(1.04 + i * 0.085), easing: easings.QUINT, fill: 'forwards' }));
-    });
-
-    // 1.10: Stat labs rise 10*s, dur 0.62, stagger 0.085, QUINT
-    labs.forEach((el, i) => {
-      animations.push(el.animate([
-        { opacity: 0, transform: `translateY(${10 * s}px)` },
-        { opacity: 1, transform: 'translateY(0)' }
-      ], { duration: dur(0.62), delay: del(1.10 + i * 0.085), easing: easings.QUINT, fill: 'forwards' }));
-    });
-
     // Cleanup: Remove intro class and cancel animations so no inline styles remain
-    const totalDuration = del(1.9);
+    const totalDuration = del(1.7);
     setTimeout(teardown, totalDuration);
   }
 
