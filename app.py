@@ -27,7 +27,17 @@ OUTPUT_FOLDER = "outputs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-app = FastAPI(title="Gamma AI Watermark Remover", version="2.3.0")
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(title="Gamma AI Watermark Remover", version="2.5.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")

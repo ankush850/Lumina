@@ -71,51 +71,32 @@ lumina/
 
 <br>
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Single-Terminal Run)
 
-You can run Lumina either locally on your machine via Python, or instantly using Docker.
+The fastest and most unified way to run the entire project is via the single-terminal command.
 
-### Option 1: Run with Docker (Recommended)
-
-The easiest way to get started without polluting your local environment. You must have Docker and Docker Compose installed.
-
-1. Clone the repository and navigate inside:
-   ```bash
-   git clone https://github.com/ankush850/gamma-ai-watermark-remover.git
-   cd gamma-ai-watermark-remover
-   ```
-2. Build and start the container:
-   ```bash
-   docker-compose up --build -d
-   ```
-3. Open your browser and go to `http://localhost:8999`
-
-### Option 2: Run Locally (Python Environment)
-
-If you are developing or modifying the `processors/` logic, running it locally is best.
-
-1. Ensure you have **Python 3.9+** installed.
-2. Clone the repository:
-   ```bash
-   cd gamma-ai-watermark-remover
-   ```
-3. Create a virtual environment and activate it:
-   ```bash
-   python -m venv venv
-   # Windows:
-   venv\Scripts\activate
-   # Mac/Linux:
-   source venv/bin/activate
-   ```
-4. Install the dependencies:
+1. **Install Python & Node Dependencies**:
    ```bash
    pip install -r requirements.txt
+   npm install
    ```
-5. Start the underlying FastAPI server via Uvicorn:
+
+2. **Start the Entire Project in a Single Terminal**:
    ```bash
-   uvicorn app:app --port 8999 --reload
+   npm run dev
    ```
-6. Visit `http://localhost:8999` to use the tool.
+   *This concurrently launches both the FastAPI Python processing engine (`http://127.0.0.1:8999`) and the Next.js React frontend (`http://localhost:3000`).*
+
+3. **Open the Application**:
+   Navigate to **`http://localhost:3000`** in your browser. All API requests and file downloads are automatically proxied directly to the backend.
+
+---
+
+### Alternative: Standalone Python Backend Only
+If you only need the headless FastAPI backend:
+```bash
+python -m uvicorn app:app --port 8999 --reload
+```
 
 ---
 
