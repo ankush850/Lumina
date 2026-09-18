@@ -43,6 +43,9 @@
   --bs: 44;
   --h1y: -12.5;
   --suby: 167.5;
+  --btny: 248;
+  --heroh: 316;
+  --statsh: 105;
   --numy: 19;
   --laby: 74;
 
@@ -58,6 +61,9 @@
     --bs: 40;
     --h1y: -10.25;
     --suby: 137.4;
+    --btny: 204;
+    --heroh: 260;
+    --statsh: 85;
     --numy: 15.6;
     --laby: 60.7;
   }
@@ -71,6 +77,9 @@
     --bs: 34;
     --h1y: -7.1;
     --suby: 108;
+    --btny: 162;
+    --heroh: 220;
+    --statsh: 75;
     --numy: 13;
     --laby: 50;
   }
@@ -301,7 +310,7 @@ nav.lumina-nav {
 .btn-cta {
   position: absolute;
   left: calc(73 * var(--s));
-  top: calc(248 * var(--s));
+  top: calc(var(--btny) * var(--s));
 }
 
 @media (hover: hover) {
@@ -373,9 +382,9 @@ body.nav-open .burger-bar:nth-child(3) { width: 100%; transform: translateY(calc
 
 /* Fluid Spacers */
 .sp { width: 100%; }
-.sp-a { flex: 239; }
-.sp-b { flex: 194; }
-.sp-c { flex: 115; }
+.sp-a { flex: 239; min-height: calc(15 * var(--s)); }
+.sp-b { flex: 194; min-height: calc(25 * var(--s)); }
+.sp-c { flex: 115; min-height: calc(15 * var(--s)); }
 
 @media (max-width: 1023px) and (max-aspect-ratio: 1/1) {
   .sp-a { flex: 340; }
@@ -393,6 +402,8 @@ body.nav-open .burger-bar:nth-child(3) { width: 100%; transform: translateY(calc
 .hero {
   position: relative;
   width: 100%;
+  height: calc(var(--heroh) * var(--s));
+  flex-shrink: 0;
 }
 
 .hero h1 {
@@ -435,7 +446,8 @@ body.nav-open .burger-bar:nth-child(3) { width: 100%; transform: translateY(calc
 .stats {
   position: relative;
   width: 100%;
-  height: calc(105 * var(--s));
+  height: calc(var(--statsh) * var(--s));
+  flex-shrink: 0;
 }
 
 .stat-item {
