@@ -304,7 +304,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="sub">
-            {"Engineered to stay resilient, controlled,\nand uncompromised under pressure."}
+            {"Engineered to eliminate presentation watermarks,\npreserving 100% vector fidelity and layout integrity."}
           </p>
 
           <Link href="/studio" className="btn btn-cta">
