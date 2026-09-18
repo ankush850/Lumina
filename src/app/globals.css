@@ -383,18 +383,18 @@ body.nav-open .burger-bar:nth-child(3) { width: 100%; transform: translateY(calc
 /* Fluid Spacers */
 .sp { width: 100%; }
 .sp-a { flex: 239; min-height: calc(15 * var(--s)); }
-.sp-b { flex: 194; min-height: calc(25 * var(--s)); }
+.sp-b { flex: 414; min-height: calc(25 * var(--s)); }
 .sp-c { flex: 115; min-height: calc(15 * var(--s)); }
 
 @media (max-width: 1023px) and (max-aspect-ratio: 1/1) {
   .sp-a { flex: 340; }
-  .sp-b { flex: 276; }
+  .sp-b { flex: 524; }
   .sp-c { flex: 163; }
 }
 
 @media (max-width: 599px) {
   .sp-a { flex: 106; }
-  .sp-b { flex: 92; }
+  .sp-b { flex: 170; }
   .sp-c { flex: 56; }
 }
 
