@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Lumina — Security built into every system layer",
-  description: "Engineered to eliminate presentation watermarks, preserving 100% vector fidelity and layout integrity.",
+  description: "Pristine presentations, zero watermarks. Engineered for lossless layout and vector retention.",
   icons: {
     icon: "/favicon.svg",
   },

@@ -268,10 +268,7 @@ export default function LandingPage() {
               <span>Resources</span>
               <svg className="nav-chevron" viewBox="0 0 11 6"><path d="M1 1L5.5 5L10 1" /></svg>
             </Link>
-            <Link href="/studio" className="nav-item">
-              <span>Benefits</span>
-              <svg className="nav-chevron" viewBox="0 0 11 6"><path d="M1 1L5.5 5L10 1" /></svg>
-            </Link>
+            <a href="#benefits" className="nav-item">Benefits</a>
             <a href="https://github.com/ankush850/Lumina" target="_blank" rel="noopener noreferrer" className="nav-item">
               Contact
             </a>
@@ -304,7 +301,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="sub">
-            {"Engineered to eliminate presentation watermarks,\npreserving 100% vector fidelity and layout integrity."}
+            {"Pristine presentations, zero watermarks.\nEngineered for lossless layout and vector retention."}
           </p>
 
           <Link href="/studio" className="btn btn-cta">
@@ -373,16 +370,8 @@ export default function LandingPage() {
               </div>
             </li>
 
-            <li className="menu-item" id="item-benefits">
-              <button className="mrow" type="button" onClick={() => toggleAccordion("benefits")}>
-                <span>Benefits</span>
-                <svg className="m-chevron" viewBox="0 0 14 9"><path d="M1 1L7 7L13 1" /></svg>
-              </button>
-              <div className="accordion-panel" id="panel-benefits">
-                <Link href="/studio" className="sublink" onClick={closeMenu}>Continuous monitoring</Link>
-                <Link href="/studio" className="sublink" onClick={closeMenu}>Access control</Link>
-                <Link href="/studio" className="sublink" onClick={closeMenu}>Incident response</Link>
-              </div>
+            <li className="menu-item">
+              <a href="#benefits" className="mrow" onClick={closeMenu}>Benefits</a>
             </li>
 
             <li className="menu-item">
